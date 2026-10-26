@@ -1,0 +1,73 @@
+/* Reset y variables de diseño del RPG MongoDB Quest */
+:root {
+  --bg-main: #090d16;
+  --bg-surface: #111827;
+  --bg-surface-elevated: #1e293b;
+  --bg-panel: #0f172a;
+  
+  --color-primary: #10b981;       /* Verde Esmeralda MongoDB */
+  --color-primary-glow: rgba(16, 185, 129, 0.25);
+  --color-secondary: #f59e0b;     /* Ámbar / Oro RPG */
+  --color-secondary-glow: rgba(245, 158, 11, 0.25);
+  --color-accent: #38bdf8;        /* Azul Cristal Mongoose */
+  --color-danger: #f43f5e;
+  
+  --text-main: #f8fafc;
+  --text-muted: #94a3b8;
+  --text-dim: #64748b;
+  
+  --border-subtle: #1e293b;
+  --border-gold: #f59e0b;
+  --border-emerald: #10b981;
+  
+  --font-fantasy: 'Cinzel', serif, Georgia;
+  --font-sans: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-mono: 'JetBrains Mono', monospace, Consolas;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body {
+  background-color: var(--bg-main);
+  color: var(--text-main);
+  font-family: var(--font-sans);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* Scrollbars personalizados estilo RPG */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #090d16;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #1e293b;
+  border-radius: 4px;
+  border: 1px solid #334155;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #10b981;
+}
+
+code, pre {
+  font-family: var(--font-mono);
+}
+
+button {
+  font-family: inherit;
+  cursor: pointer;
+  border: none;
+  background: none;
+}

@@ -1,0 +1,23 @@
+{
+  "version": 1,
+  "skills": {
+    "frontend-design": {
+      "source": "anthropics/skills",
+      "sourceType": "github",
+      "skillPath": "skills/frontend-design/SKILL.md",
+      "computedHash": "106acf230014cbb43ca34e6410371321b56ca742f9ee0442e8ec05bf02eb0384"
+    },
+    "game-design": {
+      "source": "saschb2b/skills",
+      "sourceType": "github",
+      "skillPath": "skills/productivity/game-design/SKILL.md",
+      "computedHash": "690135c9d4ec487c7ebcd9d76a0f1c945690302cb46223dcdbe4ef9c09a3ab5a"
+    },
+    "rpg": {
+      "source": "gamedev-skills/awesome-gamedev-agent-skills",
+      "sourceType": "github",
+      "skillPath": "skills/genres/rpg/SKILL.md",
+      "computedHash": "92bdb46defcf0d36c0328744a2a865ad1d59663000585894e91419428047b0eb"
+    }
+  }
+}
