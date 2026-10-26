@@ -176,17 +176,31 @@ function createNPCMesh(zoneColor, isPlayer = false) {
     legs.push({ group: legGroup, shin: shinGroup });
   });
 
-  return { group, torso, head, hair, arms, legs };
+  return {
+    group,
+    torso,
+    head,
+    hair,
+    arms,
+    legs,
+    mats: { clothMat, skirtMat, hairMat, armMat, legMat }
+  };
 }
 
 // Crea el modelo de personaje jugador con báculo detallado
-function createPlayerMesh() {
-  const { group, torso, head, hair, arms, legs } = createNPCMesh(0x1d4ed8, true);
+function createPlayerMesh(cosmetics = {}) {
+  const robeColor = cosmetics.robe_color !== undefined ? cosmetics.robe_color : 0x1d4ed8;
+  const hairColor = cosmetics.hair_color !== undefined ? cosmetics.hair_color : 0x3b1f0a;
+  const capeColor = cosmetics.cape_color !== undefined ? cosmetics.cape_color : 0x1e1b4b;
+  const gemColor  = cosmetics.gem_color  !== undefined ? cosmetics.gem_color  : 0x00ffaa;
+
+  const { group, torso, head, hair, arms, legs, mats } = createNPCMesh(robeColor, true);
+  if (mats.hairMat) mats.hairMat.color.setHex(hairColor);
 
   // Capa / Manto trasero
   const capeGeo = new THREE.PlaneGeometry(0.5, 0.7, 1, 4);
   const capeMat = new THREE.MeshStandardMaterial({
-    color: 0x1e1b4b,
+    color: capeColor,
     side: THREE.DoubleSide,
     roughness: 0.8,
   });
@@ -225,8 +239,8 @@ function createPlayerMesh() {
 
   const gemGeo = new THREE.OctahedronGeometry(0.1, 1);
   const gemMat = new THREE.MeshStandardMaterial({
-    color: 0x00ffaa,
-    emissive: 0x00cc88,
+    color: gemColor,
+    emissive: gemColor,
     emissiveIntensity: 1.8,
     roughness: 0.0,
     metalness: 0.0,
@@ -237,13 +251,32 @@ function createPlayerMesh() {
   gem.position.y = 2.1;
   staffGroup.add(gem);
 
-  const staffLight = new THREE.PointLight(0x00ffaa, 2.5, 6);
+  const staffLight = new THREE.PointLight(gemColor, 2.5, 6);
   staffLight.position.y = 2.1;
   staffGroup.add(staffLight);
 
   group.add(staffGroup);
 
-  return { group, torso, head, hair, arms, legs, gem, cape };
+  return {
+    group,
+    torso,
+    head,
+    hair,
+    arms,
+    legs,
+    gem,
+    cape,
+    mats: {
+      robe: mats.clothMat,
+      skirt: mats.skirtMat,
+      hair: mats.hairMat,
+      arm: mats.armMat,
+      leg: mats.legMat,
+      cape: capeMat,
+      gem: gemMat,
+      light: staffLight,
+    }
+  };
 }
 
 // Construye el terreno con variaciones de altura procedurales
@@ -604,10 +637,12 @@ function buildCollectible(scene, cp, idx) {
 // ===========================
 // COMPONENTE PRINCIPAL
 // ===========================
-export default function GameCanvas3D({ player, onTalkNpc, onCollectItem, onZoneChange }) {
+export default function GameCanvas3D({ player, cosmetics, onTalkNpc, onCollectItem, onZoneChange }) {
   const mountRef = useRef(null);
   const [nearbyPrompt, setNearbyPrompt] = useState(null);
   const [controlsHelp, setControlsHelp] = useState(true);
+  // Refs a los materiales del jugador para actualización reactiva
+  const playerMatsRef = useRef(null);
 
   const stateRef = useRef({
     keys: { w: false, a: false, s: false, d: false, shift: false },
@@ -779,10 +814,14 @@ export default function GameCanvas3D({ player, onTalkNpc, onCollectItem, onZoneC
     stateRef.current.collectibles = collectibleDefs.map((cp, idx) => buildCollectible(scene, cp, idx));
 
     // ─── PERSONAJE JUGADOR ────────────────────────────────────
-    const playerData = createPlayerMesh();
+    const initialCosmetics = cosmetics || {};
+    const playerData = createPlayerMesh(initialCosmetics);
     const playerGroup = playerData.group;
     playerGroup.position.set(0, 0.42, 5);
     scene.add(playerGroup);
+
+    // Guardar refs de materiales mutables para actualización reactiva
+    playerMatsRef.current = playerData.mats;
 
     // ─── CONTROLES ────────────────────────────────────────────
     const nearbyRef = { current: null };
@@ -978,7 +1017,30 @@ export default function GameCanvas3D({ player, onTalkNpc, onCollectItem, onZoneC
       }
       renderer.dispose();
     };
-  }, []);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // ─── ACTUALIZACIÓN REACTIVA DE COSMÉTICOS ──────────────────
+  useEffect(() => {
+    if (!playerMatsRef.current || !cosmetics) return;
+    const mats = playerMatsRef.current;
+    if (cosmetics.robe_color !== undefined && mats.robe) {
+      mats.robe.color.setHex(cosmetics.robe_color);
+      mats.arm.color.setHex(cosmetics.robe_color);
+      mats.skirt.color.set(new THREE.Color(cosmetics.robe_color).offsetHSL(0, 0, -0.12));
+      mats.leg.color.set(new THREE.Color(cosmetics.robe_color).offsetHSL(0, 0, -0.2));
+    }
+    if (cosmetics.gem_color !== undefined && mats.gem) {
+      mats.gem.color.setHex(cosmetics.gem_color);
+      mats.gem.emissive.setHex(cosmetics.gem_color);
+      if (mats.light) mats.light.color.setHex(cosmetics.gem_color);
+    }
+    if (cosmetics.hair_color !== undefined && mats.hair) {
+      mats.hair.color.setHex(cosmetics.hair_color);
+    }
+    if (cosmetics.cape_color !== undefined && mats.cape) {
+      mats.cape.color.setHex(cosmetics.cape_color);
+    }
+  }, [cosmetics]);
 
   return (
     <div className="canvas-3d-wrapper" ref={mountRef}>

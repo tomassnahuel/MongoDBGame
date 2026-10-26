@@ -10,6 +10,7 @@ import ChallengeModal from './components/ChallengeModal';
 import InventoryModal from './components/InventoryModal';
 import CodexModal from './components/CodexModal';
 import VictoryScreen from './components/VictoryScreen';
+import ShopModal from './components/ShopModal';
 import { NPCS } from './data/gameData';
 import { sound } from './utils/audio';
 import './App.css';
@@ -31,9 +32,12 @@ export default function App() {
     setShowCodex,
     showVictory,
     setShowVictory,
+    showShop,
+    setShowShop,
     notification,
     notify,
     addXp,
+    purchaseItem,
     completeQuest,
     updateZone,
     resetGame
@@ -48,7 +52,7 @@ export default function App() {
   // Manejar recolección de pergaminos/runas 3D en el mundo
   const handleCollect3DItem = (item) => {
     addXp(25);
-    notify(`¡Has recogido en 3D: "${item.name}"! (+25 EXP)`, 'success');
+    notify(`¡Has recogido: "${item.name}"! (+25 EXP)`, 'success');
   };
 
   return (
@@ -60,6 +64,7 @@ export default function App() {
         nextRank={nextRank}
         onOpenInventory={() => setShowInventory(true)}
         onOpenCodex={() => setShowCodex(true)}
+        onOpenShop={() => { sound.playSelect(); setShowShop(true); }}
         onResetGame={resetGame}
       />
 
@@ -68,20 +73,14 @@ export default function App() {
         <div className="view-toggle-group">
           <button
             className={`btn-view-toggle ${viewMode === '3d' ? 'view-active' : ''}`}
-            onClick={() => {
-              sound.playSelect();
-              setViewMode('3d');
-            }}
+            onClick={() => { sound.playSelect(); setViewMode('3d'); }}
             title="Mundo 3D con movimiento libre y personajes"
           >
             🎮 Mundo 3D Vivo
           </button>
           <button
             className={`btn-view-toggle ${viewMode === 'map' ? 'view-active' : ''}`}
-            onClick={() => {
-              sound.playSelect();
-              setViewMode('map');
-            }}
+            onClick={() => { sound.playSelect(); setViewMode('map'); }}
             title="Vista de mapa táctico 2D"
           >
             🗺️ Mapa Táctico 2D
@@ -116,6 +115,7 @@ export default function App() {
             {/* Lienzo WebGL 3D con Three.js */}
             <GameCanvas3D
               player={player}
+              cosmetics={player.cosmetics}
               onTalkNpc={(npcId) => setActiveNpcId(npcId)}
               onCollectItem={handleCollect3DItem}
               onZoneChange={(zoneId) => updateZone(zoneId)}
@@ -172,6 +172,15 @@ export default function App() {
       {/* Modal de Grimorio y Documentación Oficial */}
       {showCodex && (
         <CodexModal onClose={() => setShowCodex(false)} />
+      )}
+
+      {/* Modal de la Tienda */}
+      {showShop && (
+        <ShopModal
+          player={player}
+          onBuy={purchaseItem}
+          onClose={() => setShowShop(false)}
+        />
       )}
 
       {/* Pantalla de Victoria / Graduación */}

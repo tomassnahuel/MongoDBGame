@@ -7,6 +7,7 @@ export default function HUD({
   nextRank,
   onOpenInventory,
   onOpenCodex,
+  onOpenShop,
   onResetGame
 }) {
   const [muted, setMuted] = useState(sound.muted);
@@ -70,6 +71,15 @@ export default function HUD({
           🪙 <span className="hud-gold-value">{player.gold}</span>
         </div>
 
+        {/* Botón de Tienda — destacado en dorado */}
+        <button
+          className="hud-btn hud-btn-shop"
+          onClick={onOpenShop}
+          title="Visitar el Bazar del Archivista"
+        >
+          🛒 Tienda
+        </button>
+
         <button
           className="hud-btn hud-btn-audio"
           onClick={toggleSound}
@@ -81,10 +91,7 @@ export default function HUD({
 
         <button
           className="hud-btn"
-          onClick={() => {
-            sound.playSelect();
-            onOpenInventory();
-          }}
+          onClick={() => { sound.playSelect(); onOpenInventory(); }}
           title="Ver artefactos y recompensas mágicas"
         >
           🎒 Inventario
@@ -95,10 +102,7 @@ export default function HUD({
 
         <button
           className="hud-btn hud-btn-codex"
-          onClick={() => {
-            sound.playSelect();
-            onOpenCodex();
-          }}
+          onClick={() => { sound.playSelect(); onOpenCodex(); }}
           title="Consultar notas técnicas y documentación oficial"
         >
           📖 Grimorio Docs
