@@ -1445,3 +1445,360 @@
     padding: 1.25rem;
   }
 }
+
+/* ========================================================
+   9. VISTA Y VIEWPORT 3D (THREE.JS GAMEPLAY)
+   ======================================================== */
+.game-3d-active {
+  overflow: hidden;
+  height: 100vh;
+  padding-bottom: 0;
+}
+
+.view-mode-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.45rem 2rem;
+  background: rgba(11, 15, 25, 0.9);
+  border-bottom: 1px solid #1e293b;
+  z-index: 35;
+}
+
+.view-toggle-group {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.btn-view-toggle {
+  background: #1e293b;
+  border: 1px solid #334155;
+  color: var(--text-muted);
+  font-size: 0.82rem;
+  font-weight: 700;
+  padding: 0.35rem 0.85rem;
+  border-radius: 6px;
+  transition: all 0.2s;
+}
+
+.btn-view-toggle:hover {
+  background: #334155;
+  color: #fff;
+}
+
+.btn-view-toggle.view-active {
+  background: var(--color-primary);
+  color: #000;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 10px var(--color-primary-glow);
+}
+
+.btn-touch-toggle {
+  background: rgba(56, 189, 248, 0.1);
+  border: 1px solid rgba(56, 189, 248, 0.3);
+  color: #38bdf8;
+  font-size: 0.8rem;
+  font-weight: 600;
+  padding: 0.35rem 0.8rem;
+  border-radius: 6px;
+  transition: all 0.2s;
+}
+
+.btn-touch-toggle.touch-active {
+  background: rgba(56, 189, 248, 0.25);
+  border-color: #38bdf8;
+  color: #fff;
+}
+
+.game-main-viewport {
+  position: relative;
+  flex: 1;
+  width: 100%;
+  height: calc(100vh - 120px);
+  overflow: hidden;
+}
+
+.canvas-3d-wrapper {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  background: #090d16;
+}
+
+/* Indicador Flotante de Interacción 3D */
+.prompt-3d-interact {
+  position: absolute;
+  bottom: 3.5rem;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 20;
+  background: rgba(15, 23, 42, 0.95);
+  border: 2px solid var(--color-secondary);
+  border-radius: 999px;
+  padding: 0.5rem 1.4rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.6), 0 0 20px var(--color-secondary-glow);
+  animation: pulseGlow 2s infinite;
+}
+
+.prompt-key-badge {
+  background: var(--color-secondary);
+  color: #000;
+  font-family: var(--font-mono);
+  font-weight: 900;
+  font-size: 1rem;
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #fff;
+}
+
+.prompt-text-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.prompt-main {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #fff;
+}
+
+.prompt-sub {
+  font-size: 0.75rem;
+  color: var(--color-secondary);
+}
+
+.btn-talk-touch {
+  background: var(--color-primary);
+  color: #000;
+  font-weight: 800;
+  font-size: 0.85rem;
+  padding: 0.4rem 0.9rem;
+  border-radius: 999px;
+}
+
+/* Guía de Controles 3D en Esquina */
+.controls-3d-legend {
+  position: absolute;
+  top: 1.5rem;
+  left: 1.5rem;
+  z-index: 20;
+  background: rgba(15, 23, 42, 0.88);
+  border: 1px solid #1e293b;
+  border-radius: 10px;
+  backdrop-filter: blur(8px);
+  width: 250px;
+  overflow: hidden;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+}
+
+.legend-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.6rem 0.9rem;
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #e2e8f0;
+  cursor: pointer;
+  background: rgba(2, 6, 23, 0.5);
+  border-bottom: 1px solid #1e293b;
+}
+
+.legend-body {
+  padding: 0.75rem 0.9rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.legend-row {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+.key-tag {
+  background: #1e293b;
+  border: 1px solid #475569;
+  color: #38bdf8;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 1px 5px;
+  border-radius: 4px;
+}
+
+/* ========================================================
+   10. RADAR BRÚJULA 3D
+   ======================================================== */
+.radar-container {
+  position: absolute;
+  top: 1.5rem;
+  right: 1.5rem;
+  z-index: 20;
+  background: rgba(15, 23, 42, 0.9);
+  border: 2px solid #1e293b;
+  border-radius: 14px;
+  padding: 0.75rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  backdrop-filter: blur(8px);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+}
+
+.radar-header {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #fff;
+}
+
+.radar-dot-pulse {
+  color: var(--color-primary);
+  animation: pulseGlow 1.5s infinite;
+}
+
+.radar-map-circle {
+  width: 105px;
+  height: 105px;
+  border-radius: 50%;
+  border: 1px solid #334155;
+  background: radial-gradient(circle, #020617 30%, #0f172a 100%);
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.radar-grid-cross {
+  position: absolute;
+  inset: 0;
+  background: 
+    linear-gradient(to right, transparent 52px, rgba(51, 65, 85, 0.4) 52px, rgba(51, 65, 85, 0.4) 53px, transparent 53px),
+    linear-gradient(to bottom, transparent 52px, rgba(51, 65, 85, 0.4) 52px, rgba(51, 65, 85, 0.4) 53px, transparent 53px);
+}
+
+.radar-player-center {
+  font-size: 1.1rem;
+  z-index: 2;
+}
+
+.radar-pin {
+  position: absolute;
+  font-size: 0.85rem;
+  transition: all 0.3s;
+}
+
+.pin-nw { top: 8px; left: 12px; }
+.pin-ne { top: 8px; right: 12px; }
+.pin-sw { bottom: 8px; left: 12px; }
+.pin-se { bottom: 8px; right: 12px; }
+
+.pin-active {
+  transform: scale(1.3);
+  filter: drop-shadow(0 0 6px #10b981);
+}
+
+/* ========================================================
+   11. CONTROLES TÁCTILES EN PANTALLA
+   ======================================================== */
+.touch-controls-container {
+  position: absolute;
+  bottom: 1.5rem;
+  left: 0;
+  right: 0;
+  padding: 0 2rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  pointer-events: none;
+  z-index: 25;
+}
+
+.touch-dpad,
+.touch-actions {
+  pointer-events: auto;
+}
+
+.touch-dpad {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.dpad-middle {
+  display: flex;
+  gap: 4px;
+}
+
+.dpad-center {
+  width: 44px;
+  height: 44px;
+  background: rgba(15, 23, 42, 0.5);
+  border-radius: 6px;
+}
+
+.dpad-btn {
+  width: 44px;
+  height: 44px;
+  background: rgba(30, 41, 59, 0.85);
+  border: 1px solid #475569;
+  border-radius: 8px;
+  color: #fff;
+  font-size: 1.1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  touch-action: manipulation;
+  user-select: none;
+}
+
+.dpad-btn:active {
+  background: var(--color-primary);
+  color: #000;
+}
+
+.touch-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.touch-action-btn {
+  padding: 0.75rem 1.25rem;
+  border-radius: 999px;
+  font-weight: 700;
+  font-size: 0.9rem;
+  border: 1px solid #334155;
+  touch-action: manipulation;
+  user-select: none;
+}
+
+.btn-jump {
+  background: rgba(30, 41, 59, 0.9);
+  color: #38bdf8;
+  border-color: #38bdf8;
+}
+
+.btn-interact {
+  background: linear-gradient(180deg, #f59e0b, #d97706);
+  color: #000;
+  border-color: #fbbf24;
+  box-shadow: 0 4px 15px rgba(245, 158, 11, 0.4);
+}
