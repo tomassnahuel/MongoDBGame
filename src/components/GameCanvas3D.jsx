@@ -1011,7 +1011,7 @@ function loadWizardCharacter(scene, playerGroup, onLoadingState) {
 // ============================================================================
 const NPC_CONFIGS = {
   npc_bsonia: {
-    modelFile: '/models/witch_hunter_in_long_coat_and_wide_hat.glb',
+    modelFile: '/models/dark_knight_-_hitem3d_hi3d_vs_supavoxel_test.glb',
     targetHeight: 2.3,
     color: 0x10b981,
     baseRotY: -Math.PI / 4,
@@ -1023,7 +1023,7 @@ const NPC_CONFIGS = {
     baseRotY: -3 * Math.PI / 4,
   },
   npc_relatia: {
-    modelFile: '/models/knight_artorias_and_great_grey_wolf_sif.glb',
+    modelFile: '/models/knight_artorias.glb',
     targetHeight: 2.3,
     color: 0x38bdf8,
     baseRotY: Math.PI / 4,
@@ -1066,7 +1066,7 @@ const NPC_CONFIGS = {
     baseRotY: Math.PI,
   },
   npc_keeper: {
-    modelFile: '/models/fantasy_villager.glb',
+    modelFile: '/models/mastercraft_mithril_armor_set_for_beyond_skyrim2.glb',
     targetHeight: 2.2,
     color: 0xec4899,
     baseRotY: 0,

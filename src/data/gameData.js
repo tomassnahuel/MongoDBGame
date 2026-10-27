@@ -183,7 +183,7 @@ export const NPCS = {
     name: "Maestra Bsonia",
     title: "Escriba Mayor de Documentos BSON",
     avatar: "🧙‍♀️",
-    model: "/models/witch_hunter_in_long_coat_and_wide_hat.glb",
+    model: "/models/dark_knight_-_hitem3d_hi3d_vs_supavoxel_test.glb",
     zoneId: "zone_bson",
     questId: "quest_1",
     dialogue: {
@@ -283,7 +283,7 @@ export const NPCS = {
     name: "Arquitecta Relatia",
     title: "Guardiana de la Aguja de Relaciones",
     avatar: "🧙‍♂️",
-    model: "/models/knight_artorias_and_great_grey_wolf_sif.glb",
+    model: "/models/knight_artorias.glb",
     zoneId: "zone_relations",
     questId: "quest_3",
     dialogue: {
@@ -524,7 +524,7 @@ export const NPCS = {
     name: "Guardiana Gridsa",
     title: "Vigilante del Umbral de GridFS",
     avatar: "📦",
-    model: "/models/fantasy_villager.glb",
+    model: "/models/mastercraft_mithril_armor_set_for_beyond_skyrim2.glb",
     zoneId: "zone_gridfs_gate",
     questId: "quest_10",
     dialogue: {
