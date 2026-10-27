@@ -2,7 +2,7 @@
 class SoundManager {
   constructor() {
     this.ctx = null;
-    this.muted = true; // Comienza silenciado respetando las políticas del navegador hasta que el usuario lo activa
+    this.muted = false;
     this.bgm = null;
     this.bgmSrc = '/Audio/sounduniversestudio-skyrim-music-epic-the-elder-scrolls-sound-track-204714.mp3';
   }
@@ -29,7 +29,7 @@ class SoundManager {
     if (this.muted) return;
     this.init();
     this.initBgm();
-    if (this.bgm) {
+    if (this.bgm?.paused) {
       this.bgm.play().catch((err) => {
         console.warn('Reproducción de audio a la espera de interacción:', err);
       });
