@@ -1240,49 +1240,9 @@ function buildSoulsNPCs(scene, zoneConfigs, loader) {
 }
 
 // ============================================================================
-// COLECCIONABLE GÓTICO (ALMAS Y RUNAS FLOTANTES DE SABIDURÍA)
-// ============================================================================
-function buildSoulsCollectible(scene, cp, idx) {
-  const cGroup = new THREE.Group();
-  cGroup.position.set(cp.x, 1.3, cp.z);
-
-  // Alma brillante flotante al estilo Dark Souls (Soul of a Proud Knight)
-  const coreGeo = new THREE.OctahedronGeometry(0.26, 2);
-  const coreMat = new THREE.MeshStandardMaterial({
-    color: 0xcfe6ff,
-    emissive: 0x4da6ff,
-    emissiveIntensity: 2.2,
-    roughness: 0.0,
-    metalness: 0.1,
-    transparent: true,
-    opacity: 0.88,
-  });
-  const cMesh = new THREE.Mesh(coreGeo, coreMat);
-  cGroup.add(cMesh);
-
-  // Halo etéreo y chispas
-  const haloGeo = new THREE.SphereGeometry(0.38, 12, 12);
-  const haloMat = new THREE.MeshBasicMaterial({
-    color: 0x38bdf8,
-    transparent: true,
-    opacity: 0.25,
-    wireframe: true,
-  });
-  const halo = new THREE.Mesh(haloGeo, haloMat);
-  cGroup.add(halo);
-
-  const cLight = new THREE.PointLight(0x38bdf8, 2.0, 6);
-  cLight.position.y = 0.2;
-  cGroup.add(cLight);
-
-  scene.add(cGroup);
-  return { id: `soul_${idx}`, group: cGroup, mesh: cMesh, halo, type: cp.type, name: cp.name, collected: false };
-}
-
-// ============================================================================
 // COMPONENTE PRINCIPAL: LIENZO 3D DARK SOULS 3 (IRITHYLL ESTILO ARTÍSTICO)
 // ============================================================================
-export default function GameCanvas3D({ player, onTalkNpc, onCollectItem, onZoneChange }) {
+export default function GameCanvas3D({ player, onTalkNpc, onZoneChange }) {
   const mountRef = useRef(null);
   const [nearbyPrompt, setNearbyPrompt] = useState(null);
   const [controlsHelp, setControlsHelp] = useState(true);
@@ -1295,7 +1255,6 @@ export default function GameCanvas3D({ player, onTalkNpc, onCollectItem, onZoneC
     currentRotation: 0,
     targetRotation: 0,
     isGrounded: true,
-    collectibles: [],
     npcObjects: [],
     activeZone: 'zone_bson',
     walkPhase: 0,
@@ -1578,17 +1537,6 @@ export default function GameCanvas3D({ player, onTalkNpc, onCollectItem, onZoneC
     const npcMeshes = buildSoulsNPCs(scene, zoneConfigs, gltfLoader);
     stateRef.current.npcObjects = npcMeshes;
 
-    // ─── 10. ALMAS Y RUNAS COLECCIONABLES ───────────────────────
-    const collectibleDefs = [
-      { x: -6,  z: -4,  type: 'scroll',  name: 'Alma de Sabio: Documento BSON' },
-      { x: 6,   z: -5,  type: 'rune',    name: 'Runa Ancestral de Mongoose' },
-      { x: -5,  z: 7,   type: 'crystal', name: 'Fragmento de Enlace ObjectId' },
-      { x: 5,   z: 8,   type: 'scroll',  name: 'Códice del Escriba Oscuro' },
-      { x: 0,   z: -14, type: 'rune',    name: 'Sello de la Hoguera Central' },
-      { x: -12, z: 0,   type: 'crystal', name: 'Esquirla de Titanita MongoDB' },
-    ];
-    stateRef.current.collectibles = collectibleDefs.map((cp, idx) => buildSoulsCollectible(scene, cp, idx));
-
     // ─── 11. PERSONAJE JUGADOR: MAGO ARTICULADO (GLTF RIGGED) ─
     const playerGroup = new THREE.Group();
     playerGroup.position.set(0, 0, 4);
@@ -1753,22 +1701,6 @@ export default function GameCanvas3D({ player, onTalkNpc, onCollectItem, onZoneC
 
         if (npc.modelSlot) {
           npc.modelSlot.position.y = Math.sin(t * 1.8 + i) * 0.02;
-        }
-      });
-
-      // Coleccionables (almas que levitan y giran)
-      stateRef.current.collectibles.forEach((c) => {
-        if (!c.collected) {
-          c.mesh.rotation.y = t * 2.0;
-          c.halo.rotation.x = t * 1.5;
-          c.group.position.y = 1.3 + Math.sin(t * 2.4) * 0.18;
-          const dist = playerGroup.position.distanceTo(c.group.position);
-          if (dist < 1.5) {
-            c.collected = true;
-            c.group.visible = false;
-            sound.playSuccess();
-            onCollectItem(c);
-          }
         }
       });
 

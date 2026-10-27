@@ -32,8 +32,6 @@ export default function App() {
     showVictory,
     setShowVictory,
     notification,
-    notify,
-    addXp,
     completeQuest,
     updateZone,
     resetGame
@@ -77,12 +75,6 @@ export default function App() {
 
     return () => window.clearTimeout(resetTimeout);
   }, [health]);
-
-  // Manejar recolección de pergaminos/runas 3D en el mundo
-  const handleCollect3DItem = (item) => {
-    addXp(25);
-    notify(`¡Has recogido en 3D: "${item.name}"! (+25 EXP)`, 'success');
-  };
 
   return (
     <div className="game-wrapper game-3d-active">
@@ -151,7 +143,6 @@ export default function App() {
             <GameCanvas3D
               player={player}
               onTalkNpc={(npcId) => setActiveNpcId(npcId)}
-              onCollectItem={handleCollect3DItem}
               onZoneChange={(zoneId) => updateZone(zoneId)}
             />
 
