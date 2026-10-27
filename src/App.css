@@ -5,9 +5,9 @@
 .game-wrapper {
   display: flex;
   flex-direction: column;
-  min-height: 100vh;
+  height: 100vh;
   background: radial-gradient(circle at 50% 0%, #172554 0%, #090d16 65%);
-  padding-bottom: 3rem;
+  overflow: hidden;
 }
 
 /* ========================================================
@@ -231,6 +231,23 @@
   margin: 0 auto;
   padding: 2.5rem 1.5rem;
   width: 100%;
+  box-sizing: border-box;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: #334155 transparent;
+}
+
+.world-container::-webkit-scrollbar {
+  width: 6px;
+}
+
+.world-container::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.world-container::-webkit-scrollbar-thumb {
+  background: #334155;
+  border-radius: 999px;
 }
 
 .world-header {
@@ -269,10 +286,285 @@
   margin: 0 auto;
 }
 
-/* Grid de Zonas */
+/* ========================================================
+   PANEL DE PROGRESO GLOBAL TÁCTICO
+   ======================================================== */
+.tactical-progress-panel {
+  background: rgba(13, 20, 32, 0.85);
+  border: 1px solid rgba(181, 147, 69, 0.4);
+  border-radius: 16px;
+  padding: 1.4rem 1.75rem;
+  margin: 1.75rem auto 0 auto;
+  max-width: 1040px;
+  box-shadow: 0 10px 32px rgba(0, 0, 0, 0.65), inset 0 0 16px rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(14px);
+  text-align: left;
+}
+
+.tactical-progress-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.75rem;
+}
+
+.tactical-meta-title {
+  display: block;
+  font-family: 'Cinzel', serif;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #d4af37;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  margin-bottom: 2px;
+}
+
+.tactical-meta-value {
+  display: block;
+  font-size: 1rem;
+  font-weight: 700;
+  color: #f1f5f9;
+}
+
+.tactical-percent-badge {
+  font-family: 'Cinzel', serif;
+  font-size: 1.4rem;
+  font-weight: 800;
+  color: #fbbf24;
+  background: rgba(245, 158, 11, 0.14);
+  border: 1px solid rgba(245, 158, 11, 0.45);
+  padding: 0.2rem 0.85rem;
+  border-radius: 10px;
+  box-shadow: 0 0 12px rgba(245, 158, 11, 0.25);
+}
+
+.tactical-progress-bar-bg {
+  height: 11px;
+  background: #04070e;
+  border: 1px solid rgba(181, 147, 69, 0.35);
+  border-radius: 999px;
+  overflow: hidden;
+  position: relative;
+  box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.8);
+  margin-bottom: 1.1rem;
+}
+
+.tactical-progress-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #b59345 0%, #f59e0b 50%, #10b981 100%);
+  border-radius: 999px;
+  transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  box-shadow: 0 0 12px rgba(16, 185, 129, 0.45);
+}
+
+.tactical-bar-shine {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 40%;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.4), transparent);
+  border-radius: 999px;
+}
+
+.tactical-stats-row {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  flex-wrap: wrap;
+}
+
+.tactical-stat-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  background: rgba(15, 23, 42, 0.8);
+  border: 1px solid #1e293b;
+  border-radius: 8px;
+  padding: 0.35rem 0.75rem;
+  font-size: 0.8rem;
+  color: #94a3b8;
+}
+
+.tactical-stat-pill .stat-label {
+  color: #cbd5e1;
+}
+
+.tactical-stat-pill .stat-count {
+  font-weight: 700;
+  color: #fff;
+  font-family: var(--font-mono);
+}
+
+.pill-sanctum-unlocked {
+  border-color: rgba(16, 185, 129, 0.6);
+  background: rgba(16, 185, 129, 0.12);
+  color: #34d399;
+}
+
+.pill-sanctum-unlocked .stat-count {
+  color: #34d399;
+}
+
+.pill-sanctum-locked {
+  border-color: rgba(245, 158, 11, 0.4);
+  background: rgba(245, 158, 11, 0.08);
+}
+
+.pill-sanctum-locked .stat-count {
+  color: #fbbf24;
+}
+
+/* ========================================================
+   BARRA DE HERRAMIENTAS TÁCTICA (FILTROS Y BÚSQUEDA)
+   ======================================================== */
+.tactical-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin: 1.75rem auto 0 auto;
+  max-width: 1040px;
+  flex-wrap: wrap;
+}
+
+.tactical-filter-tabs {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  flex-wrap: wrap;
+}
+
+.tactical-tab {
+  background: rgba(15, 23, 42, 0.75);
+  border: 1px solid #334155;
+  color: #94a3b8;
+  font-size: 0.8rem;
+  font-weight: 700;
+  padding: 0.45rem 0.9rem;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.tactical-tab:hover {
+  background: #1e293b;
+  color: #fff;
+  border-color: #475569;
+}
+
+.tactical-tab.tab-active {
+  background: rgba(181, 147, 69, 0.2);
+  border-color: #d4af37;
+  color: #fbbf24;
+  box-shadow: 0 0 12px rgba(181, 147, 69, 0.25);
+}
+
+.tactical-search-box {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: rgba(15, 23, 42, 0.85);
+  border: 1px solid #334155;
+  border-radius: 8px;
+  padding: 0.45rem 0.9rem;
+  flex: 1;
+  min-width: 260px;
+  max-width: 440px;
+  transition: border-color 0.2s;
+}
+
+.tactical-search-box:focus-within {
+  border-color: #b59345;
+  box-shadow: 0 0 10px rgba(181, 147, 69, 0.25);
+}
+
+.search-icon {
+  font-size: 0.9rem;
+  color: #94a3b8;
+}
+
+.tactical-search-input {
+  background: transparent;
+  border: none;
+  outline: none;
+  color: #fff;
+  font-size: 0.85rem;
+  width: 100%;
+}
+
+.tactical-search-input::placeholder {
+  color: #64748b;
+  font-size: 0.8rem;
+}
+
+.btn-clear-search {
+  background: transparent;
+  border: none;
+  color: #94a3b8;
+  font-size: 0.8rem;
+  cursor: pointer;
+  padding: 2px 4px;
+}
+
+.btn-clear-search:hover {
+  color: #fff;
+}
+
+/* Estado Vacío cuando ningún distrito coincide */
+.tactical-empty-state {
+  text-align: center;
+  padding: 3.5rem 1.5rem;
+  background: rgba(13, 20, 32, 0.6);
+  border: 1px dashed #334155;
+  border-radius: 16px;
+  max-width: 600px;
+  margin: 2rem auto;
+}
+
+.tactical-empty-state .empty-icon {
+  font-size: 2.8rem;
+  display: block;
+  margin-bottom: 0.75rem;
+}
+
+.tactical-empty-state h3 {
+  font-family: 'Cinzel', serif;
+  font-size: 1.3rem;
+  color: #fff;
+  margin-bottom: 0.5rem;
+}
+
+.tactical-empty-state p {
+  color: #94a3b8;
+  font-size: 0.9rem;
+  margin-bottom: 1.25rem;
+}
+
+.btn-reset-filters {
+  background: #1e293b;
+  border: 1px solid #b59345;
+  color: #fbbf24;
+  padding: 0.5rem 1.25rem;
+  border-radius: 8px;
+  font-weight: 700;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-reset-filters:hover {
+  background: rgba(181, 147, 69, 0.25);
+}
+
+/* ========================================================
+   GRID Y TARJETAS DE DISTRITO TÁCTICO
+   ======================================================== */
 .zones-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(270px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
   gap: 1.5rem;
   margin-bottom: 2.5rem;
 }
@@ -280,25 +572,36 @@
 .zone-card {
   background: #0f172a;
   border: 2px solid #1e293b;
-  border-radius: 14px;
+  border-radius: 16px;
   padding: 1.5rem;
   display: flex;
   flex-direction: column;
-  transition: all 0.25s ease;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
   overflow: hidden;
   cursor: pointer;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
 }
 
 .zone-card:hover:not(.zone-card-locked) {
   border-color: var(--zone-color);
   transform: translateY(-4px);
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4), 0 0 15px rgba(16, 185, 129, 0.15);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.55), 0 0 18px rgba(16, 185, 129, 0.15);
 }
 
 .zone-card-active {
   border-color: var(--zone-color);
-  box-shadow: 0 0 20px rgba(16, 185, 129, 0.2);
+  box-shadow: 0 0 24px rgba(16, 185, 129, 0.35);
+  animation: pulseCardGlow 2.5s infinite alternate ease-in-out;
+}
+
+@keyframes pulseCardGlow {
+  0% { box-shadow: 0 0 14px rgba(16, 185, 129, 0.25); }
+  100% { box-shadow: 0 0 26px rgba(16, 185, 129, 0.55); }
+}
+
+.zone-card-completed {
+  border-color: rgba(16, 185, 129, 0.45);
 }
 
 .zone-card-locked {
@@ -315,9 +618,9 @@
 }
 
 .zone-icon {
-  font-size: 2.4rem;
+  font-size: 2.2rem;
   background: rgba(255, 255, 255, 0.05);
-  padding: 0.5rem;
+  padding: 0.45rem 0.55rem;
   border-radius: 12px;
   display: inline-flex;
 }
@@ -329,21 +632,44 @@
   gap: 0.35rem;
 }
 
+.badge-quest-type {
+  font-family: 'Cinzel', serif;
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  padding: 1px 7px;
+  border-radius: 6px;
+  text-transform: uppercase;
+}
+
+.badge-quest-type.type-main {
+  background: rgba(245, 158, 11, 0.18);
+  border: 1px solid rgba(245, 158, 11, 0.5);
+  color: #fbbf24;
+}
+
+.badge-quest-type.type-side {
+  background: rgba(56, 189, 248, 0.14);
+  border: 1px solid rgba(56, 189, 248, 0.4);
+  color: #38bdf8;
+}
+
 .badge-current-location {
   background: var(--color-primary);
   color: #000;
-  font-size: 0.7rem;
+  font-size: 0.68rem;
   font-weight: 800;
   padding: 2px 8px;
   border-radius: 999px;
   text-transform: uppercase;
+  animation: pulseGlow 2s infinite;
 }
 
 .badge-completed {
   background: rgba(16, 185, 129, 0.2);
   color: #10b981;
   border: 1px solid #10b981;
-  font-size: 0.7rem;
+  font-size: 0.68rem;
   font-weight: 700;
   padding: 2px 8px;
   border-radius: 999px;
@@ -353,7 +679,7 @@
   background: rgba(244, 63, 94, 0.2);
   color: #f43f5e;
   border: 1px solid #f43f5e;
-  font-size: 0.7rem;
+  font-size: 0.68rem;
   font-weight: 700;
   padding: 2px 8px;
   border-radius: 999px;
@@ -380,8 +706,78 @@
   font-size: 0.88rem;
   color: var(--text-muted);
   line-height: 1.45;
-  margin-bottom: 1.2rem;
+  margin-bottom: 1rem;
   flex: 1;
+}
+
+/* ========================================================
+   PREVIEW DE MISIÓN Y RECOMPENSAS EN LA TARJETA
+   ======================================================== */
+.zone-quest-preview {
+  background: rgba(2, 6, 23, 0.7);
+  border: 1px solid rgba(181, 147, 69, 0.3);
+  border-radius: 10px;
+  padding: 0.75rem 0.85rem;
+  margin-bottom: 0.85rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.quest-preview-title {
+  display: flex;
+  align-items: baseline;
+  gap: 0.4rem;
+  font-size: 0.8rem;
+}
+
+.quest-mini-tag {
+  font-family: 'Cinzel', serif;
+  font-size: 0.65rem;
+  font-weight: 800;
+  color: #b59345;
+  letter-spacing: 1px;
+}
+
+.quest-name-text {
+  font-weight: 700;
+  color: #e2e8f0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.quest-reward-chips {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.reward-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: 6px;
+}
+
+.reward-chip.xp-chip {
+  background: rgba(245, 158, 11, 0.15);
+  border: 1px solid rgba(245, 158, 11, 0.45);
+  color: #fbbf24;
+}
+
+.reward-chip.item-chip {
+  background: rgba(56, 189, 248, 0.12);
+  border: 1px solid rgba(56, 189, 248, 0.4);
+  color: #38bdf8;
+  white-space: nowrap;
+  max-width: 170px;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 /* NPC Box en la Zona */
@@ -389,11 +785,11 @@
   background: rgba(2, 6, 23, 0.6);
   border: 1px solid #1e293b;
   border-radius: 10px;
-  padding: 0.75rem;
+  padding: 0.65rem 0.75rem;
   display: flex;
   align-items: center;
-  gap: 0.75rem;
-  margin-bottom: 1rem;
+  gap: 0.65rem;
+  margin-bottom: 0.95rem;
 }
 
 .npc-avatar-circle {
@@ -405,10 +801,12 @@
   align-items: center;
   justify-content: center;
   font-size: 1.3rem;
+  flex-shrink: 0;
 }
 
 .npc-info-col {
   flex: 1;
+  min-width: 0;
 }
 
 .npc-name {
@@ -416,12 +814,18 @@
   font-size: 0.88rem;
   font-weight: 700;
   color: #fff;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .npc-title {
   display: block;
   font-size: 0.72rem;
   color: var(--text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .npc-indicator-alert {
@@ -455,34 +859,80 @@
   font-size: 0.9rem;
 }
 
-@keyframes pulseGlow {
-  0% { transform: scale(1); box-shadow: 0 0 0 rgba(245, 158, 11, 0.4); }
-  50% { transform: scale(1.1); box-shadow: 0 0 10px rgba(245, 158, 11, 0.8); }
-  100% { transform: scale(1); box-shadow: 0 0 0 rgba(245, 158, 11, 0.4); }
+/* ========================================================
+   BOTONES DE ACCIÓN DUAL TÁCTICA
+   ======================================================== */
+.zone-actions-dual {
+  display: grid;
+  grid-template-columns: 1.3fr 1fr;
+  gap: 0.6rem;
+  margin-top: auto;
 }
 
-.btn-zone-enter {
-  width: 100%;
+.btn-zone-talk {
   background: linear-gradient(180deg, #1e293b, #0f172a);
   border: 1px solid #334155;
-  color: #fff;
-  padding: 0.65rem 1rem;
+  color: #f1f5f9;
+  padding: 0.65rem 0.85rem;
   border-radius: 8px;
-  font-size: 0.85rem;
+  font-size: 0.82rem;
   font-weight: 700;
+  cursor: pointer;
   transition: all 0.2s ease;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
-.btn-zone-enter:hover:not(:disabled) {
-  background: var(--color-primary);
-  color: #000;
-  border-color: var(--color-primary);
+.btn-zone-talk:hover:not(:disabled) {
+  background: #334155;
+  color: #fff;
+  border-color: #64748b;
+  transform: translateY(-1px);
+}
+
+.btn-zone-challenge {
+  background: linear-gradient(180deg, rgba(181, 147, 69, 0.25), rgba(181, 147, 69, 0.12));
+  border: 1px solid #b59345;
+  color: #fbbf24;
+  padding: 0.65rem 0.85rem;
+  border-radius: 8px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+}
+
+.btn-zone-challenge:hover:not(:disabled) {
+  background: linear-gradient(180deg, rgba(245, 158, 11, 0.4), rgba(181, 147, 69, 0.25));
+  border-color: #fbbf24;
+  color: #fff;
+  transform: translateY(-1px);
+  box-shadow: 0 0 12px rgba(245, 158, 11, 0.35);
+}
+
+.btn-zone-challenge.challenge-done {
+  background: rgba(16, 185, 129, 0.15);
+  border-color: rgba(16, 185, 129, 0.5);
+  color: #34d399;
+}
+
+.btn-zone-challenge.challenge-done:hover:not(:disabled) {
+  background: rgba(16, 185, 129, 0.28);
+  border-color: #10b981;
 }
 
 .btn-disabled {
-  opacity: 0.5;
+  opacity: 0.45;
   cursor: not-allowed;
+  pointer-events: none;
 }
+
 
 .world-footer-tip {
   background: rgba(15, 23, 42, 0.8);
@@ -1660,20 +2110,22 @@
 }
 
 .view-mode-bar {
-  position: absolute;
+  position: fixed;
   top: 1.1rem;
   left: 50%;
   transform: translateX(-50%);
   display: flex;
   align-items: center;
   gap: 0.65rem;
-  padding: 0.3rem 0.85rem;
+  padding: 0.35rem 0.85rem;
   background: rgba(10, 15, 23, 0.85);
   border: 1px solid #374151;
   border-radius: 6px;
-  z-index: 36;
+  z-index: 45;
   backdrop-filter: blur(12px);
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.85);
+  width: auto;
+  max-width: max-content;
 }
 
 .view-toggle-group {
@@ -2100,13 +2552,13 @@
 
 /* ─── HUD SUPERIOR DARK SOULS 3: TRIPLE BARRA Y MEDALLÓN ──── */
 .souls-hud-top {
-  position: absolute;
+  position: fixed;
   top: 1.25rem;
   left: 1.5rem;
   display: flex;
   align-items: flex-start;
   gap: 1rem;
-  z-index: 35;
+  z-index: 40;
   pointer-events: auto;
   user-select: none;
 }
@@ -3327,6 +3779,515 @@
     max-height: calc(100vh - 9rem);
     z-index: 35;
     box-shadow: 0 16px 48px rgba(0, 0, 0, 0.95), 0 0 24px rgba(181, 147, 69, 0.35);
+  }
+}
+
+/* ========================================================
+   MODO MAPA TÁCTICO 2D — game-map-active
+   ======================================================== */
+
+.game-map-active {
+  overflow: hidden;
+  height: 100vh;
+}
+
+/* En modo mapa la barra de vista permanece fija y centrada en la parte superior sin expandirse */
+.game-map-active .view-mode-bar {
+  position: fixed;
+  top: 1.1rem;
+  left: 50%;
+  transform: translateX(-50%);
+  width: auto;
+  max-width: max-content;
+  z-index: 45;
+  margin: 0;
+}
+
+/* En modo mapa el viewport se desplaza verticalmente */
+.game-map-active .game-main-viewport {
+  position: static;
+  flex: 1;
+  width: 100%;
+  height: 100%;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+/* El WorldMap tiene espacio superior suficiente para no ser tapado por el HUD ni la barra centrada */
+.game-map-active .game-main-viewport .world-container {
+  height: auto;
+  min-height: 100%;
+  padding-top: 6.5rem;
+  padding-bottom: 4rem;
+  overflow-y: visible;
+}
+
+/* El grid de zonas garantiza que se vean todas las tarjetas */
+.zones-grid {
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+}
+
+/* En pantallas pequeñas */
+@media (max-width: 640px) {
+  .zones-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .game-map-active .game-main-viewport .world-container {
+    padding-top: 8rem;
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+
+  .world-title {
+    font-size: 1.7rem;
+  }
+
+  .view-mode-bar {
+    top: 5rem;
+    left: 50%;
+    transform: translateX(-50%);
+    width: auto;
+    max-width: calc(100vw - 2rem);
+    padding: 0.25rem 0.6rem;
+    gap: 0.35rem;
+  }
+
+  .btn-view-toggle {
+    font-size: 0.75rem;
+    padding: 0.25rem 0.5rem;
+  }
+}
+
+/* ========================================================
+   PANTALLA DE SELECCIÓN DE ENTRADA: 3D vs MAPA TÁCTICO 2D
+   ======================================================== */
+.mode-selection-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  background:
+    radial-gradient(ellipse at 50% 25%, rgba(181, 147, 69, 0.18) 0%, transparent 65%),
+    radial-gradient(circle at 50% 80%, rgba(16, 185, 129, 0.12) 0%, transparent 70%),
+    linear-gradient(180deg, #070b12 0%, #03050a 100%);
+  backdrop-filter: blur(16px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem 1.5rem;
+  overflow-y: auto;
+  animation: fadeInModal 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.mode-selection-container {
+  width: 100%;
+  max-width: 980px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2rem;
+  margin: auto;
+}
+
+.mode-selection-header {
+  text-align: center;
+}
+
+.mode-selection-tag {
+  display: inline-block;
+  font-family: 'Cinzel', serif;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 3px;
+  color: #d4af37;
+  background: rgba(181, 147, 69, 0.14);
+  border: 1px solid rgba(181, 147, 69, 0.4);
+  padding: 0.3rem 1rem;
+  border-radius: 999px;
+  margin-bottom: 0.75rem;
+  box-shadow: 0 0 12px rgba(181, 147, 69, 0.2);
+}
+
+.mode-selection-title {
+  font-family: 'Cinzel', serif;
+  font-size: clamp(2rem, 4vw, 2.85rem);
+  font-weight: 800;
+  color: #fff;
+  letter-spacing: 1.5px;
+  text-shadow: 0 4px 20px rgba(0, 0, 0, 0.8), 0 0 30px rgba(181, 147, 69, 0.35);
+  margin-bottom: 0.75rem;
+}
+
+.mode-selection-subtitle {
+  color: #94a3b8;
+  font-size: 1.05rem;
+  max-width: 620px;
+  margin: 0 auto;
+  line-height: 1.6;
+}
+
+.mode-selection-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1.75rem;
+  width: 100%;
+}
+
+.mode-card {
+  background: rgba(13, 20, 32, 0.85);
+  border: 1px solid rgba(55, 65, 81, 0.75);
+  border-radius: 18px;
+  padding: 2.25rem 1.85rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 12px 35px rgba(0, 0, 0, 0.65);
+  outline: none;
+}
+
+.mode-card:hover,
+.mode-card:focus-visible {
+  transform: translateY(-6px);
+  box-shadow: 0 20px 45px rgba(0, 0, 0, 0.85), 0 0 25px rgba(181, 147, 69, 0.3);
+}
+
+.mode-card-3d {
+  border-top: 3px solid #b59345;
+}
+
+.mode-card-3d:hover,
+.mode-card-3d:focus-visible {
+  border-color: #d4af37;
+}
+
+.mode-card-map {
+  border-top: 3px solid #10b981;
+}
+
+.mode-card-map:hover,
+.mode-card-map:focus-visible {
+  border-color: #34d399;
+  box-shadow: 0 20px 45px rgba(0, 0, 0, 0.85), 0 0 25px rgba(16, 185, 129, 0.3);
+}
+
+.mode-card-badge {
+  font-family: 'Cinzel', serif;
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 1.5px;
+  color: #fbbf24;
+  background: rgba(245, 158, 11, 0.15);
+  border: 1px solid rgba(245, 158, 11, 0.4);
+  padding: 0.2rem 0.75rem;
+  border-radius: 999px;
+  margin-bottom: 1.25rem;
+}
+
+.mode-card-badge.badge-fast {
+  color: #34d399;
+  background: rgba(16, 185, 129, 0.15);
+  border-color: rgba(16, 185, 129, 0.4);
+}
+
+.mode-card-icon-wrapper {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(181, 147, 69, 0.25) 0%, rgba(15, 23, 42, 0.8) 75%);
+  border: 2px solid rgba(181, 147, 69, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 1.25rem;
+  box-shadow: 0 0 20px rgba(181, 147, 69, 0.25);
+  transition: transform 0.3s ease;
+}
+
+.mode-card-icon-wrapper.icon-map {
+  background: radial-gradient(circle, rgba(16, 185, 129, 0.25) 0%, rgba(15, 23, 42, 0.8) 75%);
+  border-color: rgba(16, 185, 129, 0.5);
+  box-shadow: 0 0 20px rgba(16, 185, 129, 0.25);
+}
+
+.mode-card:hover .mode-card-icon-wrapper {
+  transform: scale(1.12) rotate(4deg);
+}
+
+.mode-card-icon {
+  font-size: 2.2rem;
+}
+
+.mode-card-title {
+  font-family: 'Cinzel', serif;
+  font-size: 1.45rem;
+  font-weight: 700;
+  color: #fff;
+  margin-bottom: 0.6rem;
+}
+
+.mode-card-desc {
+  font-size: 0.88rem;
+  color: #cbd5e1;
+  line-height: 1.55;
+  margin-bottom: 1.25rem;
+}
+
+.mode-card-features {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 1.75rem 0;
+  width: 100%;
+  text-align: left;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  font-size: 0.82rem;
+  color: #94a3b8;
+  background: rgba(3, 7, 18, 0.45);
+  border: 1px solid #1e293b;
+  border-radius: 10px;
+  padding: 0.9rem 1rem;
+}
+
+.mode-card-features li {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.btn-mode-select {
+  width: 100%;
+  padding: 0.85rem 1.25rem;
+  border-radius: 10px;
+  font-family: 'Cinzel', serif;
+  font-size: 0.95rem;
+  font-weight: 700;
+  letter-spacing: 0.8px;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  border: 1px solid transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.btn-mode-3d {
+  background: linear-gradient(135deg, #b59345, #d4af37);
+  color: #0b0f19;
+  box-shadow: 0 4px 18px rgba(181, 147, 69, 0.4);
+}
+
+.btn-mode-3d:hover {
+  background: linear-gradient(135deg, #d4af37, #fbbf24);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 24px rgba(251, 191, 36, 0.55);
+}
+
+.btn-mode-map {
+  background: linear-gradient(135deg, #059669, #10b981);
+  color: #fff;
+  box-shadow: 0 4px 18px rgba(16, 185, 129, 0.4);
+}
+
+.btn-mode-map:hover {
+  background: linear-gradient(135deg, #10b981, #34d399);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 24px rgba(16, 185, 129, 0.55);
+}
+
+.mode-selection-footer {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  background: rgba(15, 23, 42, 0.7);
+  border: 1px solid #1e293b;
+  border-radius: 10px;
+  padding: 0.75rem 1.5rem;
+  color: #94a3b8;
+  font-size: 0.85rem;
+  text-align: center;
+  max-width: 680px;
+}
+
+.footer-tip-icon {
+  font-size: 1.25rem;
+}
+
+/* ========================================================
+   PANTALLA DE CARGA PROGRESIVA REAL DEL MUNDO 3D
+   ======================================================== */
+.souls-loading-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 90;
+  background:
+    radial-gradient(ellipse at 50% 35%, rgba(181, 147, 69, 0.22) 0%, transparent 60%),
+    linear-gradient(180deg, #080c14 0%, #03050a 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+  animation: fadeInModal 0.25s ease-out;
+}
+
+.souls-loading-container {
+  width: 100%;
+  max-width: 520px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.souls-loading-emblem {
+  position: relative;
+  width: 80px;
+  height: 80px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 1.5rem;
+}
+
+.souls-loading-fire {
+  font-size: 2.8rem;
+  animation: soulsBonfireFlicker 1.8s infinite alternate ease-in-out;
+  filter: drop-shadow(0 0 20px rgba(245, 158, 11, 0.75));
+  z-index: 2;
+}
+
+.souls-loading-ring {
+  position: absolute;
+  inset: 0;
+  border: 2px dashed rgba(181, 147, 69, 0.6);
+  border-radius: 50%;
+  animation: soulsRingSpin 8s infinite linear;
+  box-shadow: 0 0 25px rgba(181, 147, 69, 0.35);
+}
+
+@keyframes soulsBonfireFlicker {
+  0% { transform: scale(0.94); filter: drop-shadow(0 0 14px rgba(245, 158, 11, 0.6)); }
+  100% { transform: scale(1.08); filter: drop-shadow(0 0 28px rgba(251, 191, 36, 0.95)); }
+}
+
+@keyframes soulsRingSpin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.souls-loading-tag {
+  font-family: 'Cinzel', serif;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 2.5px;
+  color: #b59345;
+  margin-bottom: 0.4rem;
+}
+
+.souls-loading-title {
+  font-family: 'Cinzel', serif;
+  font-size: 1.85rem;
+  font-weight: 800;
+  color: #fff;
+  letter-spacing: 1px;
+  margin-bottom: 1.25rem;
+  text-shadow: 0 2px 12px rgba(0, 0, 0, 0.8);
+}
+
+.souls-loading-percentage {
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  margin-bottom: 1rem;
+}
+
+.souls-loading-num {
+  font-family: 'Cinzel', serif;
+  font-size: 3.2rem;
+  font-weight: 800;
+  color: #d4af37;
+  line-height: 1;
+  text-shadow: 0 0 20px rgba(212, 175, 55, 0.45);
+}
+
+.souls-loading-symbol {
+  font-family: 'Cinzel', serif;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #b59345;
+  margin-left: 4px;
+}
+
+.souls-loading-track {
+  width: 100%;
+  height: 12px;
+  background: #080d17;
+  border: 1px solid rgba(181, 147, 69, 0.5);
+  border-radius: 999px;
+  overflow: hidden;
+  position: relative;
+  box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.85), 0 0 15px rgba(181, 147, 69, 0.2);
+  margin-bottom: 1rem;
+}
+
+.souls-loading-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #b59345 0%, #f59e0b 60%, #10b981 100%);
+  border-radius: 999px;
+  transition: width 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  box-shadow: 0 0 12px rgba(245, 158, 11, 0.6);
+}
+
+.souls-loading-shine {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 40%;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.45), transparent);
+  border-radius: 999px;
+}
+
+.souls-loading-stage {
+  color: #94a3b8;
+  font-size: 0.88rem;
+  font-family: monospace;
+  letter-spacing: 0.3px;
+  min-height: 1.4rem;
+}
+
+@keyframes fadeInModal {
+  from { opacity: 0; transform: scale(0.98); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+@media (max-width: 768px) {
+  .mode-selection-grid {
+    grid-template-columns: 1fr;
+    gap: 1.25rem;
+  }
+
+  .mode-selection-title {
+    font-size: 1.8rem;
+  }
+
+  .mode-card {
+    padding: 1.5rem;
+  }
+
+  .souls-loading-title {
+    font-size: 1.5rem;
+  }
+
+  .souls-loading-num {
+    font-size: 2.6rem;
   }
 }
 
