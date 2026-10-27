@@ -6,6 +6,7 @@ export default function HUD({
   player,
   currentRank,
   nextRank,
+  health,
   onOpenInventory,
   onOpenCodex,
   onResetGame
@@ -48,7 +49,7 @@ export default function HUD({
           {/* Barra de Salud (HP) */}
           <div className="souls-bar-row souls-bar-hp">
             <div className="souls-bar-frame">
-              <div className="souls-bar-fill hp-fill" style={{ width: '92%' }}>
+              <div className="souls-bar-fill hp-fill" style={{ width: `${health}%` }}>
                 <span className="souls-bar-shine"></span>
               </div>
             </div>

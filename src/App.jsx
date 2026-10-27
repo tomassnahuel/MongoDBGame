@@ -41,9 +41,19 @@ export default function App() {
 
   const [viewMode, setViewMode] = useState('3d'); // '3d' | 'map'
   const [showTouchControls, setShowTouchControls] = useState(false);
+  const [health, setHealth] = useState(100);
 
   const activeNpc = NPCS[activeNpcId];
   const isQuestDone = activeNpc ? player.completedQuests.includes(activeNpc.questId) : false;
+
+  const handleWrongAnswer = () => {
+    setHealth((currentHealth) => Math.max(0, currentHealth - 10));
+  };
+
+  const handleResetGame = () => {
+    setHealth(100);
+    resetGame();
+  };
 
   // Manejar recolección de pergaminos/runas 3D en el mundo
   const handleCollect3DItem = (item) => {
@@ -58,9 +68,10 @@ export default function App() {
         player={player}
         currentRank={currentRank}
         nextRank={nextRank}
+        health={health}
         onOpenInventory={() => setShowInventory(true)}
         onOpenCodex={() => setShowCodex(true)}
-        onResetGame={resetGame}
+        onResetGame={handleResetGame}
       />
 
       {/* Barra de Modo de Vista y Ayuda */}
@@ -157,6 +168,7 @@ export default function App() {
           itemsDb={itemsDb}
           setItemsDb={setItemsDb}
           onCompleteQuest={(qId) => completeQuest(qId)}
+          onWrongAnswer={handleWrongAnswer}
           onClose={() => setActiveChallengeQuestId(null)}
         />
       )}
@@ -182,7 +194,7 @@ export default function App() {
             setShowVictory(false);
             setShowCodex(true);
           }}
-          onRestart={resetGame}
+          onRestart={handleResetGame}
           onClose={() => setShowVictory(false)}
         />
       )}

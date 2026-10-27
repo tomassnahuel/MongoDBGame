@@ -7,6 +7,7 @@ export default function ChallengeModal({
   itemsDb,
   setItemsDb,
   onCompleteQuest,
+  onWrongAnswer,
   onClose
 }) {
   const quest = QUESTS[questId];
@@ -43,11 +44,16 @@ export default function ChallengeModal({
 
   if (!quest) return null;
 
+  const handleWrongAnswer = () => {
+    sound.playError();
+    onWrongAnswer();
+  };
+
   // --- LÓGICA DE VALIDACIÓN DESAFÍO 1 ---
   const handleExecuteQ1 = () => {
     sound.playSelect();
     if (q1QueryChoice !== 'mongo_find') {
-      sound.playError();
+      handleWrongAnswer();
       setFeedback({
         status: 'error',
         text: 'Revisa tu consulta de lectura: en MongoDB utilizamos "db.coleccion.find({ filtro })", no sintaxis de SQL ni funciones en memoria de JavaScript.'
@@ -56,7 +62,7 @@ export default function ChallengeModal({
     }
 
     if (q1UpdateChoice !== 'set_update') {
-      sound.playError();
+      handleWrongAnswer();
       setFeedback({
         status: 'error',
         text: '¡Cuidado con la actualización! En MongoDB debemos usar el operador atómico "$set: { stock: 15 }". Si omites $set, correrías el riesgo de sobreescribir el documento completo perdiendo campos.'
@@ -81,7 +87,7 @@ export default function ChallengeModal({
   const handleExecuteQ2 = () => {
     sound.playSelect();
     if (q2ValidationConcept !== 'both') {
-      sound.playError();
+      handleWrongAnswer();
       setFeedback({
         status: 'error',
         text: 'Sobre la validación: recuerda que MongoDB SÍ soporta validación NATIVA en el motor ($jsonSchema), pero con Node.js usamos Mongoose a nivel de APLICACIÓN para definir Schemas con tipos y capturar errores antes de tocar la base de datos.'
@@ -90,7 +96,7 @@ export default function ChallengeModal({
     }
 
     if (!q2RequiredCheck || !q2EnumCheck || !q2MinCheck) {
-      sound.playError();
+      handleWrongAnswer();
       setFeedback({
         status: 'error',
         text: 'Asegúrate de activar todas las reglas del Schema del Aventurero: "required: true" para el nombre, "enum" para restringir la clase y "min: 1" para el nivel.'
@@ -110,7 +116,7 @@ export default function ChallengeModal({
   const handleExecuteQ3 = () => {
     sound.playSelect();
     if (q3Case1 !== 'embed') {
-      sound.playError();
+      handleWrongAnswer();
       setFeedback({
         status: 'error',
         text: 'En el Caso 1 (Estadísticas fijas del Héroe), es mejor EMBEBER (Subdocumento): se consultan siempre juntas en combate, la relación es 1:1 fija y la lectura en una sola operación maximiza la velocidad.'
@@ -119,7 +125,7 @@ export default function ChallengeModal({
     }
 
     if (q3Case2 !== 'ref') {
-      sound.playError();
+      handleWrongAnswer();
       setFeedback({
         status: 'error',
         text: 'En el Caso 2 (Historial de 50.000 comentarios/misiones), ¡debes REFERENCIAR con ObjectId! Si embebes arreglos que crecen indefinidamente, romperás el límite estricto de 16 MB por documento de MongoDB.'
@@ -128,7 +134,7 @@ export default function ChallengeModal({
     }
 
     if (q3PopulateCode !== 'populate') {
-      sound.playError();
+      handleWrongAnswer();
       setFeedback({
         status: 'error',
         text: 'Para resolver las referencias en Mongoose, usamos el método .populate("misiones") para unir los documentos referenciados.'
@@ -148,7 +154,7 @@ export default function ChallengeModal({
   const handleExecuteQ4 = () => {
     sound.playSelect();
     if (q4Step1 !== 'connect') {
-      sound.playError();
+      handleWrongAnswer();
       setFeedback({
         status: 'error',
         text: 'Paso 1: Para conectar Node.js a MongoDB mediante Mongoose se utiliza "await mongoose.connect(URI)".'
@@ -157,7 +163,7 @@ export default function ChallengeModal({
     }
 
     if (q4Step2 !== 'separate_col') {
-      sound.playError();
+      handleWrongAnswer();
       setFeedback({
         status: 'error',
         text: 'Paso 2: Si un documento corre riesgo de superar los 16 MB por un arreglo ilimitado, la solución arquitectónica correcta es separar los registros en una colección propia y relacionarlos mediante ObjectId.'
@@ -166,7 +172,7 @@ export default function ChallengeModal({
     }
 
     if (q4Step3 !== 'query_gte') {
-      sound.playError();
+      handleWrongAnswer();
       setFeedback({
         status: 'error',
         text: 'Paso 3: Para consultar niveles mayores o iguales a 3 se usa el operador "$gte: 3" junto a .populate("misiones").'
@@ -194,7 +200,7 @@ export default function ChallengeModal({
     }
 
     if (documentAnswer !== quest.challenge.answer) {
-      sound.playError();
+      handleWrongAnswer();
       setFeedback({
         status: 'error',
         text: quest.challenge.hint
