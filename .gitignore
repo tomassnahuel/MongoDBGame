@@ -22,3 +22,9 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Scratch and Large models (>100MB)
+scratch/
+public/models/kamababa_-_the_cauldron_grandma.glb
+public/models/witch_hunter_in_long_coat_and_wide_hat.glb
+

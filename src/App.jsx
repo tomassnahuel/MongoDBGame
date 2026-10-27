@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useGameState } from './hooks/useGameState';
 import HUD from './components/HUD';
 import GameCanvas3D from './components/GameCanvas3D';
@@ -10,7 +10,7 @@ import ChallengeModal from './components/ChallengeModal';
 import InventoryModal from './components/InventoryModal';
 import CodexModal from './components/CodexModal';
 import VictoryScreen from './components/VictoryScreen';
-import ShopModal from './components/ShopModal';
+import QuestRoadmap from './components/QuestRoadmap';
 import { NPCS } from './data/gameData';
 import { sound } from './utils/audio';
 import './App.css';
@@ -32,12 +32,7 @@ export default function App() {
     setShowCodex,
     showVictory,
     setShowVictory,
-    showShop,
-    setShowShop,
     notification,
-    notify,
-    addXp,
-    purchaseItem,
     completeQuest,
     updateZone,
     resetGame
@@ -45,27 +40,65 @@ export default function App() {
 
   const [viewMode, setViewMode] = useState('3d'); // '3d' | 'map'
   const [showTouchControls, setShowTouchControls] = useState(false);
+  const [health, setHealth] = useState(100);
+  const [isDead, setIsDead] = useState(false);
+  const deathHandled = useRef(false);
 
   const activeNpc = NPCS[activeNpcId];
   const isQuestDone = activeNpc ? player.completedQuests.includes(activeNpc.questId) : false;
 
-  // Manejar recolección de pergaminos/runas 3D en el mundo
-  const handleCollect3DItem = (item) => {
-    addXp(25);
-    notify(`¡Has recogido: "${item.name}"! (+25 EXP)`, 'success');
+  const handleWrongAnswer = () => {
+    setHealth((currentHealth) => Math.max(0, currentHealth - 10));
   };
 
+  const handleResetGame = () => {
+    setHealth(100);
+    resetGame();
+  };
+
+  const resetGameRef = useRef(handleResetGame);
+
+  useEffect(() => {
+    resetGameRef.current = handleResetGame;
+  });
+
+  useEffect(() => {
+    if (health > 0 || deathHandled.current) return undefined;
+
+    deathHandled.current = true;
+    setIsDead(true);
+
+    const resetTimeout = window.setTimeout(() => {
+      resetGameRef.current();
+      setIsDead(false);
+      deathHandled.current = false;
+    }, 1800);
+
+    return () => window.clearTimeout(resetTimeout);
+  }, [health]);
+
   return (
-    <div className="game-wrapper game-3d-active">
+    <div className={`game-wrapper game-3d-active ${showTouchControls ? 'touch-controls-enabled' : ''}`}>
       {/* HUD Superior Fijo con Estadísticas y Barra de EXP */}
       <HUD
         player={player}
         currentRank={currentRank}
         nextRank={nextRank}
+        health={health}
         onOpenInventory={() => setShowInventory(true)}
         onOpenCodex={() => setShowCodex(true)}
-        onOpenShop={() => { sound.playSelect(); setShowShop(true); }}
-        onResetGame={resetGame}
+        onResetGame={handleResetGame}
+      />
+
+      {/* Roadmap de Misiones a la izquierda (Principales y Secundarias) */}
+      <QuestRoadmap
+        player={player}
+        onSelectZone={(zId) => updateZone(zId)}
+        onTalkNpc={(npcId) => setActiveNpcId(npcId)}
+        onStartChallenge={(questId) => {
+          setActiveNpcId(null);
+          setActiveChallengeQuestId(questId);
+        }}
       />
 
       {/* Barra de Modo de Vista y Ayuda */}
@@ -73,14 +106,20 @@ export default function App() {
         <div className="view-toggle-group">
           <button
             className={`btn-view-toggle ${viewMode === '3d' ? 'view-active' : ''}`}
-            onClick={() => { sound.playSelect(); setViewMode('3d'); }}
+            onClick={() => {
+              sound.playSelect();
+              setViewMode('3d');
+            }}
             title="Mundo 3D con movimiento libre y personajes"
           >
             🎮 Mundo 3D Vivo
           </button>
           <button
             className={`btn-view-toggle ${viewMode === 'map' ? 'view-active' : ''}`}
-            onClick={() => { sound.playSelect(); setViewMode('map'); }}
+            onClick={() => {
+              sound.playSelect();
+              setViewMode('map');
+            }}
             title="Vista de mapa táctico 2D"
           >
             🗺️ Mapa Táctico 2D
@@ -115,9 +154,7 @@ export default function App() {
             {/* Lienzo WebGL 3D con Three.js */}
             <GameCanvas3D
               player={player}
-              cosmetics={player.cosmetics}
               onTalkNpc={(npcId) => setActiveNpcId(npcId)}
-              onCollectItem={handleCollect3DItem}
               onZoneChange={(zoneId) => updateZone(zoneId)}
             />
 
@@ -156,7 +193,9 @@ export default function App() {
           questId={activeChallengeQuestId}
           itemsDb={itemsDb}
           setItemsDb={setItemsDb}
+          health={health}
           onCompleteQuest={(qId) => completeQuest(qId)}
+          onWrongAnswer={handleWrongAnswer}
           onClose={() => setActiveChallengeQuestId(null)}
         />
       )}
@@ -174,15 +213,6 @@ export default function App() {
         <CodexModal onClose={() => setShowCodex(false)} />
       )}
 
-      {/* Modal de la Tienda */}
-      {showShop && (
-        <ShopModal
-          player={player}
-          onBuy={purchaseItem}
-          onClose={() => setShowShop(false)}
-        />
-      )}
-
       {/* Pantalla de Victoria / Graduación */}
       {showVictory && (
         <VictoryScreen
@@ -191,9 +221,19 @@ export default function App() {
             setShowVictory(false);
             setShowCodex(true);
           }}
-          onRestart={resetGame}
+          onRestart={handleResetGame}
           onClose={() => setShowVictory(false)}
         />
+      )}
+
+      {isDead && (
+        <div className="modal-backdrop death-backdrop" role="alertdialog" aria-modal="true">
+          <div className="death-message">
+            <span className="death-icon" aria-hidden="true">☠</span>
+            <h1>Has muerto</h1>
+            <p>La aventura volverá a comenzar...</p>
+          </div>
+        </div>
       )}
     </div>
   );

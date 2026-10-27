@@ -1,6 +1,19 @@
 import React from 'react';
 import { ZONES } from '../data/gameData';
 
+const RADAR_POSITIONS = {
+  zone_bson: { top: '22%', left: '20%' },
+  zone_mongoose: { top: '20%', left: '74%' },
+  zone_relations: { top: '80%', left: '20%' },
+  zone_sanctum: { top: '78%', left: '83%' },
+  zone_document_hall: { top: '7%', left: '50%' },
+  zone_bson_archive: { top: '34%', left: '91%' },
+  zone_nested_garden: { top: '55%', left: '91%' },
+  zone_dot_tower: { top: '92%', left: '68%' },
+  zone_id_vault: { top: '92%', left: '34%' },
+  zone_gridfs_gate: { top: '55%', left: '9%' }
+};
+
 export default function RadarCompass({ currentZoneId, onFastTravel }) {
   const currentZone = ZONES.find((z) => z.id === currentZoneId) || ZONES[0];
 
@@ -13,23 +26,20 @@ export default function RadarCompass({ currentZoneId, onFastTravel }) {
 
       <div className="radar-map-circle">
         <div className="radar-grid-cross"></div>
-        {/* Marcadores de los 4 distritos */}
-        <div className={`radar-pin pin-nw ${currentZoneId === 'zone_bson' ? 'pin-active' : ''}`} title="Valle de los Documentos (BSON)">
-          📜
-        </div>
-        <div className={`radar-pin pin-ne ${currentZoneId === 'zone_mongoose' ? 'pin-active' : ''}`} title="La Forja de Esquemas (Mongoose)">
-          ⚒️
-        </div>
-        <div className={`radar-pin pin-sw ${currentZoneId === 'zone_relations' ? 'pin-active' : ''}`} title="La Aguja de las Relaciones">
-          🏛️
-        </div>
-        <div className={`radar-pin pin-se ${currentZoneId === 'zone_sanctum' ? 'pin-active' : ''}`} title="El Sanctum del Gran Custodio">
-          👑
-        </div>
+        {ZONES.map((zone) => (
+          <div
+            key={zone.id}
+            className={`radar-pin ${currentZoneId === zone.id ? 'pin-active' : ''}`}
+            style={{ ...RADAR_POSITIONS[zone.id], '--zone-color': zone.color }}
+            title={zone.name}
+          >
+            {zone.icon}
+          </div>
+        ))}
 
         {/* Marcador del jugador en el centro */}
         <div className="radar-player-center" title="Tu posición en el mundo 3D">
-          🧙
+          ⚔️
         </div>
       </div>
     </div>

@@ -1,8 +1,10 @@
-// Sintetizador Web Audio API para efectos de sonido retro RPG (sin librerías externas)
+// Gestor de Audio: Efectos de sonido (Web Audio API) y Banda Sonora Épica de Fondo
 class SoundManager {
   constructor() {
     this.ctx = null;
-    this.muted = false;
+    this.muted = true; // Comienza silenciado respetando las políticas del navegador hasta que el usuario lo activa
+    this.bgm = null;
+    this.bgmSrc = '/Audio/sounduniversestudio-skyrim-music-epic-the-elder-scrolls-sound-track-204714.mp3';
   }
 
   init() {
@@ -12,6 +14,43 @@ class SoundManager {
         this.ctx = new AudioContext();
       }
     }
+  }
+
+  initBgm() {
+    if (!this.bgm && typeof window !== 'undefined') {
+      this.bgm = new Audio(this.bgmSrc);
+      this.bgm.loop = true;
+      this.bgm.volume = 0.45; // Volumen equilibrado para acompañar la aventura
+      this.bgm.preload = 'auto';
+    }
+  }
+
+  playBgm() {
+    if (this.muted) return;
+    this.init();
+    this.initBgm();
+    if (this.bgm) {
+      this.bgm.play().catch((err) => {
+        console.warn('Reproducción de audio a la espera de interacción:', err);
+      });
+    }
+  }
+
+  pauseBgm() {
+    if (this.bgm) {
+      this.bgm.pause();
+    }
+  }
+
+  toggleMute() {
+    this.muted = !this.muted;
+    if (this.muted) {
+      this.pauseBgm();
+    } else {
+      this.playBgm();
+      this.playSelect();
+    }
+    return this.muted;
   }
 
   playTone(freq, type = 'sine', duration = 0.15, gainVal = 0.1) {
@@ -69,11 +108,6 @@ class SoundManager {
     if (this.muted) return;
     this.playTone(220, 'sawtooth', 0.15, 0.06);
     setTimeout(() => this.playTone(180, 'sawtooth', 0.2, 0.06), 120);
-  }
-
-  toggleMute() {
-    this.muted = !this.muted;
-    return this.muted;
   }
 }
 

@@ -6,7 +6,9 @@ export default function ChallengeModal({
   questId,
   itemsDb,
   setItemsDb,
+  health,
   onCompleteQuest,
+  onWrongAnswer,
   onClose
 }) {
   const quest = QUESTS[questId];
@@ -35,17 +37,24 @@ export default function ChallengeModal({
   const [q4Step2, setQ4Step2] = useState(null);
   const [q4Step3, setQ4Step3] = useState(null);
   const [q4Tested, setQ4Tested] = useState(false);
+  const [documentAnswer, setDocumentAnswer] = useState(null);
+  const [documentQuizSolved, setDocumentQuizSolved] = useState(false);
 
   // Feedback general del desafío
   const [feedback, setFeedback] = useState(null);
 
   if (!quest) return null;
 
+  const handleWrongAnswer = () => {
+    sound.playError();
+    onWrongAnswer();
+  };
+
   // --- LÓGICA DE VALIDACIÓN DESAFÍO 1 ---
   const handleExecuteQ1 = () => {
     sound.playSelect();
     if (q1QueryChoice !== 'mongo_find') {
-      sound.playError();
+      handleWrongAnswer();
       setFeedback({
         status: 'error',
         text: 'Revisa tu consulta de lectura: en MongoDB utilizamos "db.coleccion.find({ filtro })", no sintaxis de SQL ni funciones en memoria de JavaScript.'
@@ -54,7 +63,7 @@ export default function ChallengeModal({
     }
 
     if (q1UpdateChoice !== 'set_update') {
-      sound.playError();
+      handleWrongAnswer();
       setFeedback({
         status: 'error',
         text: '¡Cuidado con la actualización! En MongoDB debemos usar el operador atómico "$set: { stock: 15 }". Si omites $set, correrías el riesgo de sobreescribir el documento completo perdiendo campos.'
@@ -79,7 +88,7 @@ export default function ChallengeModal({
   const handleExecuteQ2 = () => {
     sound.playSelect();
     if (q2ValidationConcept !== 'both') {
-      sound.playError();
+      handleWrongAnswer();
       setFeedback({
         status: 'error',
         text: 'Sobre la validación: recuerda que MongoDB SÍ soporta validación NATIVA en el motor ($jsonSchema), pero con Node.js usamos Mongoose a nivel de APLICACIÓN para definir Schemas con tipos y capturar errores antes de tocar la base de datos.'
@@ -88,7 +97,7 @@ export default function ChallengeModal({
     }
 
     if (!q2RequiredCheck || !q2EnumCheck || !q2MinCheck) {
-      sound.playError();
+      handleWrongAnswer();
       setFeedback({
         status: 'error',
         text: 'Asegúrate de activar todas las reglas del Schema del Aventurero: "required: true" para el nombre, "enum" para restringir la clase y "min: 1" para el nivel.'
@@ -108,7 +117,7 @@ export default function ChallengeModal({
   const handleExecuteQ3 = () => {
     sound.playSelect();
     if (q3Case1 !== 'embed') {
-      sound.playError();
+      handleWrongAnswer();
       setFeedback({
         status: 'error',
         text: 'En el Caso 1 (Estadísticas fijas del Héroe), es mejor EMBEBER (Subdocumento): se consultan siempre juntas en combate, la relación es 1:1 fija y la lectura en una sola operación maximiza la velocidad.'
@@ -117,7 +126,7 @@ export default function ChallengeModal({
     }
 
     if (q3Case2 !== 'ref') {
-      sound.playError();
+      handleWrongAnswer();
       setFeedback({
         status: 'error',
         text: 'En el Caso 2 (Historial de 50.000 comentarios/misiones), ¡debes REFERENCIAR con ObjectId! Si embebes arreglos que crecen indefinidamente, romperás el límite estricto de 16 MB por documento de MongoDB.'
@@ -126,7 +135,7 @@ export default function ChallengeModal({
     }
 
     if (q3PopulateCode !== 'populate') {
-      sound.playError();
+      handleWrongAnswer();
       setFeedback({
         status: 'error',
         text: 'Para resolver las referencias en Mongoose, usamos el método .populate("misiones") para unir los documentos referenciados.'
@@ -146,7 +155,7 @@ export default function ChallengeModal({
   const handleExecuteQ4 = () => {
     sound.playSelect();
     if (q4Step1 !== 'connect') {
-      sound.playError();
+      handleWrongAnswer();
       setFeedback({
         status: 'error',
         text: 'Paso 1: Para conectar Node.js a MongoDB mediante Mongoose se utiliza "await mongoose.connect(URI)".'
@@ -155,7 +164,7 @@ export default function ChallengeModal({
     }
 
     if (q4Step2 !== 'separate_col') {
-      sound.playError();
+      handleWrongAnswer();
       setFeedback({
         status: 'error',
         text: 'Paso 2: Si un documento corre riesgo de superar los 16 MB por un arreglo ilimitado, la solución arquitectónica correcta es separar los registros en una colección propia y relacionarlos mediante ObjectId.'
@@ -164,7 +173,7 @@ export default function ChallengeModal({
     }
 
     if (q4Step3 !== 'query_gte') {
-      sound.playError();
+      handleWrongAnswer();
       setFeedback({
         status: 'error',
         text: 'Paso 3: Para consultar niveles mayores o iguales a 3 se usa el operador "$gte: 3" junto a .populate("misiones").'
@@ -177,6 +186,34 @@ export default function ChallengeModal({
     setFeedback({
       status: 'success',
       text: '¡Juicio del Custodio superado con honores! Has demostrado comprensión profunda de MongoDB, diseño de Schemas con Mongoose y modelado escalable de datos.'
+    });
+  };
+
+  const handleExecuteDocumentQuiz = () => {
+    sound.playSelect();
+    if (!documentAnswer) {
+      sound.playError();
+      setFeedback({
+        status: 'error',
+        text: 'Elige una respuesta antes de comprobar el códice.'
+      });
+      return;
+    }
+
+    if (documentAnswer !== quest.challenge.answer) {
+      handleWrongAnswer();
+      setFeedback({
+        status: 'error',
+        text: quest.challenge.hint
+      });
+      return;
+    }
+
+    setDocumentQuizSolved(true);
+    sound.playSuccess();
+    setFeedback({
+      status: 'success',
+      text: quest.challenge.explanation
     });
   };
 
@@ -195,6 +232,23 @@ export default function ChallengeModal({
             <div>
               <h2 className="challenge-title">{quest.title}</h2>
               <span className="challenge-mentor">Mentor: {npc?.name} ({npc?.title})</span>
+            </div>
+          </div>
+          <div
+            className="challenge-health"
+            role="progressbar"
+            aria-label="Vida del personaje"
+            aria-valuemin={0}
+            aria-valuemax={100}
+            aria-valuenow={health}
+          >
+            <div className="challenge-health-label">
+              <span aria-hidden="true">♥</span>
+              <span>Vida</span>
+              <span>{health}%</span>
+            </div>
+            <div className="challenge-health-track">
+              <div className="challenge-health-fill" style={{ width: `${health}%` }} />
             </div>
           </div>
           <button className="btn-close-challenge" onClick={onClose} aria-label="Cerrar códice">
@@ -553,6 +607,50 @@ export default function ChallengeModal({
               </div>
             )}
 
+            {quest.type === 'document_quiz' && (
+              <div className="challenge-form">
+                <div className="form-section">
+                  <label className="form-label">{quest.challenge.prompt}</label>
+                  <div className="options-radio-group">
+                    {quest.challenge.options.map((option) => (
+                      <label
+                        key={option.id}
+                        className={`radio-pill ${documentAnswer === option.id ? 'pill-selected' : ''}`}
+                      >
+                        <input
+                          type="radio"
+                          name={`document-quiz-${quest.id}`}
+                          checked={documentAnswer === option.id}
+                          onChange={() => setDocumentAnswer(option.id)}
+                        />
+                        <span>{option.label}</span>
+                      </label>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="form-actions">
+                  {!documentQuizSolved ? (
+                    <button type="button" className="btn-invoke-magic" onClick={handleExecuteDocumentQuiz}>
+                      🔎 Comprobar respuesta
+                    </button>
+                  ) : (
+                    <button type="button" className="btn-claim-reward" onClick={handleFinishAndClaim}>
+                      🎉 Reclamar recompensa y +{quest.xpReward} EXP
+                    </button>
+                  )}
+                </div>
+                <a
+                  className="document-quiz-source"
+                  href={quest.sourceUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  Consultar documentación oficial de MongoDB ↗
+                </a>
+              </div>
+            )}
+
             {/* CAJA DE FEEDBACK INMEDIATO */}
             {feedback && (
               <div className={`feedback-alert ${feedback.status === 'success' ? 'feedback-success' : 'feedback-error'}`}>
@@ -675,6 +773,18 @@ export default function ChallengeModal({
   : `// Aguardando el veredicto del Gran Custodio...
 // Revisa tus respuestas a la izquierda y presiona el botón.`}
                   </pre>
+                </>
+              )}
+
+              {quest.type === 'document_quiz' && (
+                <>
+                  <div className="console-tag">Ejemplo del Códice — Documentos BSON</div>
+                  <pre className="code-display">{quest.challenge.example}</pre>
+                  <div className="console-note-success">
+                    {documentQuizSolved
+                      ? '✓ Respuesta correcta. El concepto quedó registrado en el códice.'
+                      : 'Analiza el ejemplo y elige una respuesta para continuar.'}
+                  </div>
                 </>
               )}
             </div>
