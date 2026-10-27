@@ -22,3 +22,8 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Scratch and Large models (>100MB)
+scratch/
+public/models/corrupted_fallen_priest_-_dark_fantasy.glb
+

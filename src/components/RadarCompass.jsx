@@ -29,7 +29,7 @@ export default function RadarCompass({ currentZoneId, onFastTravel }) {
 
         {/* Marcador del jugador en el centro */}
         <div className="radar-player-center" title="Tu posición en el mundo 3D">
-          🧙
+          ⚔️
         </div>
       </div>
     </div>

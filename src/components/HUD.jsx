@@ -30,88 +30,132 @@ export default function HUD({
   }
 
   const handleReset = () => {
-    if (window.confirm('¿Deseas reiniciar toda la aventura y empezar de nuevo desde el Nivel 1?')) {
+    if (window.confirm('¿Deseas reavivar la llama desde el inicio (Nivel 1)?')) {
       onResetGame();
     }
   };
 
   return (
-    <header className="hud-container">
-      {/* Perfil del Escriba */}
-      <div className="hud-profile">
-        <div className="hud-avatar" title="Tu avatar de Escriba">
-          🧙
-          <span className="hud-level-badge">Lv.{player.level}</span>
-        </div>
-        <div className="hud-identity">
-          <div className="hud-player-name">{player.name}</div>
-          <div className="hud-player-rank">{currentRank?.title || 'Escriba'}</div>
-        </div>
-      </div>
-
-      {/* Barra de EXP */}
-      <div className="hud-xp-box">
-        <div className="hud-xp-labels">
-          <span className="hud-xp-title">EXP de Sabiduría</span>
-          <span className="hud-xp-numbers">
-            {player.xp} / {nextXpNeeded} XP ({xpPercent}%)
-          </span>
-        </div>
-        <div className="hud-xp-bar-bg" role="progressbar" aria-valuenow={xpPercent} aria-valuemin="0" aria-valuemax="100">
-          <div className="hud-xp-bar-fill" style={{ width: `${xpPercent}%` }}>
-            <div className="hud-xp-shine"></div>
+    <>
+      {/* ─── HUD SUPERIOR: BARRAS DE ESTADO DARK SOULS 3 ─────────────── */}
+      <header className="souls-hud-top">
+        {/* Medallón de Pacto / Nivel */}
+        <div className="souls-covenant-slot" title={`Nivel ${player.level} — ${player.name}`}>
+          <div className="souls-covenant-medal">
+            <span className="souls-covenant-icon">⚔️</span>
+            <span className="souls-level-badge">{player.level}</span>
           </div>
         </div>
-      </div>
 
-      {/* Recursos y Acciones Rápidas */}
-      <div className="hud-actions">
-        <div className="hud-gold" title="Monedas de Sabiduría obtenidas en misiones">
-          🪙 <span className="hud-gold-value">{player.gold}</span>
+        {/* Triple Barra Clásica: Salud (Roja), Maná/FP (Azul), Resistencia/EXP (Verde) */}
+        <div className="souls-bars-container">
+          {/* Barra de Salud (HP) */}
+          <div className="souls-bar-row souls-bar-hp">
+            <div className="souls-bar-frame">
+              <div className="souls-bar-fill hp-fill" style={{ width: '92%' }}>
+                <span className="souls-bar-shine"></span>
+              </div>
+            </div>
+          </div>
+
+          {/* Barra de Concentración / FP (Azul) */}
+          <div className="souls-bar-row souls-bar-fp">
+            <div className="souls-bar-frame">
+              <div className="souls-bar-fill fp-fill" style={{ width: '80%' }}>
+                <span className="souls-bar-shine"></span>
+              </div>
+            </div>
+          </div>
+
+          {/* Barra de Resistencia / Sabiduría (Verde - EXP) */}
+          <div className="souls-bar-row souls-bar-stamina">
+            <div className="souls-bar-frame">
+              <div className="souls-bar-fill stamina-fill" style={{ width: `${Math.max(15, xpPercent)}%` }}>
+                <span className="souls-bar-shine"></span>
+              </div>
+            </div>
+          </div>
+
+          {/* Nombre y Rango del Latente */}
+          <div className="souls-character-info">
+            <span className="souls-char-name">{player.name}</span>
+            <span className="souls-char-sep">·</span>
+            <span className="souls-char-rank">{currentRank?.title || 'Latente'}</span>
+            <span className="souls-char-sep">·</span>
+            <span className="souls-xp-text">{player.xp} / {nextXpNeeded} EXP</span>
+          </div>
         </div>
 
-        <button
-          className="hud-btn hud-btn-audio"
-          onClick={toggleSound}
-          title={muted ? 'Activar sonido' : 'Silenciar sonido'}
-          aria-label={muted ? 'Activar sonido' : 'Silenciar sonido'}
-        >
-          {muted ? '🔇' : '🔊'}
-        </button>
+        {/* Acciones Rápidas del HUD (Audio / Reinicio) */}
+        <div className="souls-hud-actions">
+          <button
+            className={`souls-hud-btn souls-hud-audio-btn ${!muted ? 'audio-playing' : ''}`}
+            onClick={toggleSound}
+            title={muted ? 'Activar banda sonora épica y efectos (Click para reproducir música)' : 'Silenciar música y efectos'}
+            aria-label={muted ? 'Activar banda sonora épica y efectos' : 'Silenciar música y efectos'}
+          >
+            {muted ? '🔇' : '🎵 🔊'}
+          </button>
+          <button
+            className="souls-hud-btn"
+            onClick={handleReset}
+            title="Reavivar la Hoguera (Reiniciar partida)"
+          >
+            ↺
+          </button>
+        </div>
+      </header>
 
-        <button
-          className="hud-btn"
-          onClick={() => {
-            sound.playSelect();
-            onOpenInventory();
-          }}
-          title="Ver artefactos y recompensas mágicas"
-        >
-          🎒 Inventario
-          {player.inventory.length > 0 && (
-            <span className="hud-badge">{player.inventory.length}</span>
-          )}
-        </button>
-
-        <button
-          className="hud-btn hud-btn-codex"
+      {/* ─── HUD INFERIOR IZQUIERDO: DIAMANTE DE EQUIPAMIENTO DARK SOULS ─── */}
+      <div className="souls-equipment-dpad">
+        {/* Arriba: Hechizo / Grimorio Docs */}
+        <div
+          className="souls-slot slot-top"
           onClick={() => {
             sound.playSelect();
             onOpenCodex();
           }}
-          title="Consultar notas técnicas y documentación oficial"
+          title="Grimorio de Hechizos y Documentación (Click para abrir)"
         >
-          📖 Grimorio Docs
-        </button>
+          <span className="slot-icon">📖</span>
+          <span className="slot-label">Grimorio</span>
+        </div>
 
-        <button
-          className="hud-btn hud-btn-reset"
-          onClick={handleReset}
-          title="Reiniciar partida"
+        {/* Izquierda: Escudo de Caballero */}
+        <div className="souls-slot slot-left" title="Escudo de Acero de Lothric (+Defensa BSON)">
+          <span className="slot-icon">🛡️</span>
+          <span className="slot-label">Escudo</span>
+        </div>
+
+        {/* Derecha: Alabarda / Lanza */}
+        <div className="souls-slot slot-right" title="Alabarda de Guardián de Irithyll (+Ataque Mongoose)">
+          <span className="slot-icon">🔱</span>
+          <span className="slot-label">Alabarda</span>
+        </div>
+
+        {/* Abajo: Frasco de Estus / Inventario de Almas */}
+        <div
+          className="souls-slot slot-bottom slot-estus"
+          onClick={() => {
+            sound.playSelect();
+            onOpenInventory();
+          }}
+          title="Frasco de Estus / Inventario de Almas (Click para abrir)"
         >
-          ↺
-        </button>
+          <span className="slot-icon">🏺</span>
+          <span className="slot-badge">{player.inventory.length}</span>
+          <span className="slot-estus-name">Frasco Estus +{player.inventory.length}</span>
+        </div>
       </div>
-    </header>
+
+      {/* ─── HUD INFERIOR DERECHO: CONTADOR DE ALMAS / ORO DARK SOULS ──── */}
+      <div className="souls-counter-container">
+        <div className="souls-rune-icon">✧</div>
+        <div className="souls-count-display">
+          <span className="souls-label">ALMAS / ORO</span>
+          <span className="souls-number">{player.gold}</span>
+        </div>
+      </div>
+    </>
   );
 }
