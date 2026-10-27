@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
-import { NPCS } from '../data/gameData';
+import { NPCS, QUESTS } from '../data/gameData';
 import { sound } from '../utils/audio';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import {
@@ -400,143 +400,235 @@ function buildSoulsCourtyardGround(scene) {
 }
 
 // ============================================================================
-// HOGUERA DARK SOULS (BONFIRE) CON ESPADA EN ESPIRAL Y BRASAS ACTIVAS
+// HOGUERAS DARK SOULS (BONFIRES) CON MODELO 3D Y TÍTULO FLOTANTE DE MISIÓN
 // ============================================================================
-function buildSoulsBonfire(scene, zc) {
-  const group = new THREE.Group();
-  group.position.set(zc.x, 0, zc.z);
 
-  // 1. Base / Montículo de cenizas oscuras y huesos
-  const ashMat = new THREE.MeshStandardMaterial({
-    color: 0x1b1c20,
-    roughness: 0.95,
-  });
-  const ashGeo = new THREE.ConeGeometry(1.6, 0.45, 12);
-  const ashMesh = new THREE.Mesh(ashGeo, ashMat);
-  ashMesh.position.y = 0.2;
-  ashMesh.receiveShadow = true;
-  group.add(ashMesh);
-
-  // Piedras calcinadas rodeando la hoguera
-  const emberStoneMat = new THREE.MeshStandardMaterial({
-    color: 0x221812,
-    roughness: 0.9,
-  });
-  for (let i = 0; i < 9; i++) {
-    const angle = (i / 9) * Math.PI * 2;
-    const r = 1.4 + (Math.random() - 0.5) * 0.25;
-    const rockGeo = new THREE.DodecahedronGeometry(0.24, 0);
-    const rock = new THREE.Mesh(rockGeo, emberStoneMat);
-    rock.position.set(Math.cos(angle) * r, 0.15, Math.sin(angle) * r);
-    rock.scale.set(1.2, 0.8, 1.1);
-    rock.castShadow = true;
-    group.add(rock);
+// Dibuja un rectángulo con esquinas redondeadas compatible con todos los navegadores
+function drawRoundedRect(ctx, x, y, width, height, radius) {
+  if (typeof ctx.roundRect === 'function') {
+    ctx.beginPath();
+    ctx.roundRect(x, y, width, height, radius);
+  } else {
+    ctx.beginPath();
+    ctx.moveTo(x + radius, y);
+    ctx.lineTo(x + width - radius, y);
+    ctx.quadraticCurveTo(x + width, y, x + width, y + radius);
+    ctx.lineTo(x + width, y + height - radius);
+    ctx.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
+    ctx.lineTo(x + radius, y + height);
+    ctx.quadraticCurveTo(x, y + height, x, y + height - radius);
+    ctx.lineTo(x, y + radius);
+    ctx.quadraticCurveTo(x, y, x + radius, y);
+    ctx.closePath();
   }
+}
 
-  // 2. La emblemática Espada en Espiral (Coiled Sword) clavada en las cenizas
-  const swordGroup = new THREE.Group();
-  swordGroup.position.set(0, 0.2, 0);
-  swordGroup.rotation.z = 0.18; // Clavada inclinada
-  swordGroup.rotation.y = Math.PI / 4;
+// Genera un Sprite con textura Canvas 2D en alta resolución para el título flotante sobre la hoguera
+function createBonfireMissionTitle(zc) {
+  const canvas = document.createElement('canvas');
+  canvas.width = 640;
+  canvas.height = 190;
+  const ctx = canvas.getContext('2d');
 
-  const bladeMat = new THREE.MeshStandardMaterial({
-    color: 0x2a1a12,
-    emissive: 0x992200,
-    emissiveIntensity: 0.8,
-    roughness: 0.4,
-    metalness: 0.7,
-  });
+  const quest = (QUESTS && QUESTS[zc.questId]) ? QUESTS[zc.questId] : {
+    title: zc.questTitle || 'Misión del Reino',
+  };
 
-  // Hoja retorcida en espiral
-  const bladeGeo = new THREE.CylinderGeometry(0.045, 0.09, 1.7, 6, 16);
-  // Efecto espiral en los vértices de la espada
-  const bPos = bladeGeo.attributes.position;
-  for (let i = 0; i < bPos.count; i++) {
-    const y = bPos.getY(i);
-    const angle = y * 4.0;
-    const x = bPos.getX(i);
-    const z = bPos.getZ(i);
-    bPos.setX(i, x * Math.cos(angle) - z * Math.sin(angle));
-    bPos.setZ(i, x * Math.sin(angle) + z * Math.cos(angle));
-  }
-  bladeGeo.computeVertexNormals();
-  const blade = new THREE.Mesh(bladeGeo, bladeMat);
-  blade.position.y = 0.9;
-  blade.castShadow = true;
-  swordGroup.add(blade);
+  const hexColor = typeof zc.color === 'number'
+    ? '#' + zc.color.toString(16).padStart(6, '0')
+    : (zc.color || '#f59e0b');
 
-  // Guarda y pomo de hierro de la espada
-  const guardGeo = new THREE.BoxGeometry(0.44, 0.07, 0.12);
-  const guardMat = new THREE.MeshStandardMaterial({ color: 0x1f1f26, metalness: 0.85, roughness: 0.3 });
-  const guard = new THREE.Mesh(guardGeo, guardMat);
-  guard.position.y = 1.76;
-  swordGroup.add(guard);
+  // Fondo oscuro traslúcido con estética gótica
+  ctx.save();
+  ctx.fillStyle = 'rgba(8, 12, 18, 0.90)';
+  drawRoundedRect(ctx, 14, 14, 612, 162, 22);
+  ctx.fill();
 
-  const hiltGeo = new THREE.CylinderGeometry(0.035, 0.035, 0.4, 8);
-  const hilt = new THREE.Mesh(hiltGeo, guardMat);
-  hilt.position.y = 1.98;
-  swordGroup.add(hilt);
+  // Borde con resplandor en el color temático de la zona
+  ctx.strokeStyle = hexColor;
+  ctx.lineWidth = 3.5;
+  ctx.shadowColor = hexColor;
+  ctx.shadowBlur = 12;
+  ctx.stroke();
+  ctx.restore();
 
-  const pommelGeo = new THREE.SphereGeometry(0.08, 8, 8);
-  const pommel = new THREE.Mesh(pommelGeo, guardMat);
-  pommel.position.y = 2.2;
-  swordGroup.add(pommel);
+  // Insignia superior: p. ej. "✦ MISIÓN I ✦"
+  const rawTitle = quest.title || zc.questTitle || '';
+  const parts = rawTitle.includes(':') ? rawTitle.split(':') : ['MISIÓN', rawTitle];
+  const missionHeader = parts[0].trim().toUpperCase();
+  const missionBody = (parts[1] || rawTitle).trim();
 
-  group.add(swordGroup);
+  ctx.save();
+  ctx.font = 'bold 22px Georgia, serif';
+  ctx.fillStyle = hexColor;
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.shadowColor = hexColor;
+  ctx.shadowBlur = 6;
+  ctx.fillText(`✦ ${missionHeader} ✦`, 320, 52);
+  ctx.restore();
 
-  // 3. Fuego sagrado y ascuas ardientes (Embers)
-  const fireCoreGeo = new THREE.OctahedronGeometry(0.32, 2);
-  const fireCoreMat = new THREE.MeshStandardMaterial({
-    color: 0xff4500,
-    emissive: 0xff7700,
-    emissiveIntensity: 3.5,
-    roughness: 0.0,
-  });
-  const fireCore = new THREE.Mesh(fireCoreGeo, fireCoreMat);
-  fireCore.position.y = 0.55;
-  group.add(fireCore);
+  // Título principal de la misión
+  ctx.save();
+  ctx.font = 'bold 30px Georgia, serif';
+  ctx.fillStyle = '#ffffff';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.shadowColor = 'rgba(0, 0, 0, 0.95)';
+  ctx.shadowBlur = 8;
+  ctx.fillText(missionBody, 320, 98);
+  ctx.restore();
 
-  // Partículas de ascuas / brasas flotantes ascendiendo (Dark Souls Embers)
-  const emberCount = 35;
-  const emberGeo = new THREE.BufferGeometry();
-  const emberPositions = new Float32Array(emberCount * 3);
-  for (let i = 0; i < emberCount * 3; i += 3) {
-    emberPositions[i] = (Math.random() - 0.5) * 0.9;
-    emberPositions[i + 1] = 0.4 + Math.random() * 1.8;
-    emberPositions[i + 2] = (Math.random() - 0.5) * 0.9;
-  }
-  emberGeo.setAttribute('position', new THREE.BufferAttribute(emberPositions, 3));
-  const emberMat = new THREE.PointsMaterial({
-    color: 0xffaa33,
-    size: 0.09,
+  // Subtítulo o temática educativa
+  const topicText = zc.questTopic || zc.name;
+  ctx.save();
+  ctx.font = '600 19px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+  ctx.fillStyle = '#94a3b8';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText(topicText, 320, 142);
+  ctx.restore();
+
+  const texture = new THREE.CanvasTexture(canvas);
+  texture.minFilter = THREE.LinearFilter;
+  texture.magFilter = THREE.LinearFilter;
+
+  const mat = new THREE.SpriteMaterial({
+    map: texture,
     transparent: true,
-    opacity: 0.85,
-    blending: THREE.AdditiveBlending,
+    depthTest: true,
+    depthWrite: false,
   });
-  const embersPoints = new THREE.Points(emberGeo, emberMat);
-  group.add(embersPoints);
 
-  // 4. Luz de hoguera cálida parpadeante
-  const bonfireLight = new THREE.PointLight(0xff6a14, 3.8, 16, 1.3);
-  bonfireLight.position.set(0, 1.1, 0);
-  bonfireLight.castShadow = true;
-  group.add(bonfireLight);
+  const sprite = new THREE.Sprite(mat);
+  sprite.scale.set(3.4, 1.01, 1);
+  sprite.position.set(0, 2.95, 0); // Flota justo arriba de la espada de la hoguera
 
-  // Runa / Mensaje de saponita brillante en el suelo
-  const runeCircleGeo = new THREE.RingGeometry(1.8, 2.3, 32);
-  const runeCircleMat = new THREE.MeshBasicMaterial({
-    color: zc.color,
-    side: THREE.DoubleSide,
-    transparent: true,
-    opacity: 0.45,
+  return { sprite, texture, mat };
+}
+
+function buildSoulsBonfires(scene, zoneConfigs, loader) {
+  const bonfireObjects = zoneConfigs.map((zc) => {
+    const group = new THREE.Group();
+    group.position.set(zc.x, 0, zc.z);
+
+    // Contenedor / Ranura para el modelo 3D cargado
+    const modelSlot = new THREE.Group();
+    group.add(modelSlot);
+
+    // Silueta temporal mientras se procesa la carga del modelo 3D
+    const ashGeo = new THREE.ConeGeometry(1.6, 0.45, 12);
+    const ashMat = new THREE.MeshStandardMaterial({
+      color: 0x1b1c20,
+      roughness: 0.95,
+    });
+    const placeholderAsh = new THREE.Mesh(ashGeo, ashMat);
+    placeholderAsh.position.y = 0.2;
+    placeholderAsh.receiveShadow = true;
+    modelSlot.add(placeholderAsh);
+
+    // Luz suave ambiental de la hoguera (sin fuego invasivo)
+    const bonfireLight = new THREE.PointLight(0xffedd5, 1.8, 12, 1.5);
+    bonfireLight.position.set(0, 1.4, 0);
+    bonfireLight.castShadow = true;
+    group.add(bonfireLight);
+
+    // Runa / Mensaje de saponita sutil en el suelo
+    const runeCircleGeo = new THREE.RingGeometry(1.8, 2.3, 32);
+    const runeCircleMat = new THREE.MeshBasicMaterial({
+      color: zc.color,
+      side: THREE.DoubleSide,
+      transparent: true,
+      opacity: 0.35,
+    });
+    const runeCircle = new THREE.Mesh(runeCircleGeo, runeCircleMat);
+    runeCircle.rotation.x = -Math.PI / 2;
+    runeCircle.position.y = 0.03;
+    group.add(runeCircle);
+
+    // Título flotante arriba sobre la misión a que hace referencia
+    const titleData = createBonfireMissionTitle(zc);
+    group.add(titleData.sprite);
+
+    scene.add(group);
+    return {
+      group,
+      modelSlot,
+      placeholderAsh,
+      bonfireLight,
+      runeCircle,
+      titleSprite: titleData.sprite,
+      titleTexture: titleData.texture,
+      titleMat: titleData.mat,
+      zoneId: zc.id,
+    };
   });
-  const runeCircle = new THREE.Mesh(runeCircleGeo, runeCircleMat);
-  runeCircle.rotation.x = -Math.PI / 2;
-  runeCircle.position.y = 0.03;
-  group.add(runeCircle);
 
-  scene.add(group);
-  return { group, fireCore, embersPoints, bonfireLight, runeCircle, swordGroup };
+  // Carga del modelo 3D de hoguera oficial de Dark Souls
+  loader.load(
+    '/models/bonfire_-_dark_souls.glb',
+    (gltf) => {
+      const model = gltf.scene;
+
+      // Remover paredes y suelo del diorama original para integrarse al mundo
+      const toRemove = [];
+      model.traverse((child) => {
+        if (child.name.toLowerCase().includes('wall') || child.name.toLowerCase().includes('ground')) {
+          toRemove.push(child);
+        }
+      });
+      toRemove.forEach((c) => c.parent && c.parent.remove(c));
+
+      // Habilitar sombras y afinar materiales PBR
+      model.traverse((child) => {
+        if (child.isMesh) {
+          child.castShadow = true;
+          child.receiveShadow = true;
+          if (child.material) {
+            child.material.roughness = Math.max(0.32, child.material.roughness ?? 0.7);
+            child.material.needsUpdate = true;
+          }
+        }
+      });
+
+      // Normalizar escala (altura 2.2m) y centrar base en (0, 0, 0)
+      const initialBox = new THREE.Box3().setFromObject(model);
+      const initialSize = initialBox.getSize(new THREE.Vector3());
+      const targetHeight = 2.2;
+      const scale = targetHeight / (initialSize.y || 1);
+      model.scale.setScalar(scale);
+
+      model.updateMatrixWorld(true);
+      const updatedBox = new THREE.Box3().setFromObject(model);
+      const updatedCenter = updatedBox.getCenter(new THREE.Vector3());
+      model.position.set(-updatedCenter.x, -updatedBox.min.y, -updatedCenter.z);
+
+      const template = new THREE.Group();
+      template.add(model);
+      template.updateMatrixWorld(true);
+
+      // Distribuir modelo clonado a cada hoguera activa
+      bonfireObjects.forEach((bf, idx) => {
+        if (bf.placeholderAsh) {
+          bf.modelSlot.remove(bf.placeholderAsh);
+          bf.placeholderAsh.geometry.dispose();
+          bf.placeholderAsh.material.dispose();
+          bf.placeholderAsh = null;
+        }
+
+        const clone = template.clone(true);
+        // Ligera rotación estética entre zonas
+        clone.rotation.y = (idx * Math.PI) / 2 + 0.35;
+        bf.modelSlot.add(clone);
+      });
+    },
+    undefined,
+    (error) => {
+      console.error('Error al cargar bonfire_-_dark_souls.glb:', error);
+    }
+  );
+
+  return bonfireObjects;
 }
 
 // ============================================================================
@@ -793,15 +885,19 @@ function loadWizardCharacter(scene, playerGroup, onLoadingState) {
 
       const model = gltf.scene;
 
-      // Habilitar sombras y optimizar materiales PBR
+      // Habilitar sombras y optimizar materiales PBR con mayor luminosidad y brillo
       model.traverse((child) => {
         if (child.isMesh) {
           child.castShadow = true;
           child.receiveShadow = true;
           child.frustumCulled = true;
           if (child.material) {
-            child.material.roughness = Math.max(0.28, child.material.roughness ?? 0.6);
-            child.material.metalness = Math.min(0.85, child.material.metalness ?? 0.2);
+            child.material.roughness = Math.min(0.52, child.material.roughness ?? 0.6);
+            child.material.metalness = Math.min(0.35, child.material.metalness ?? 0.2);
+            // Realce de color y brillo en el modelo del mago
+            if (child.material.color) {
+              child.material.color.multiplyScalar(1.5);
+            }
             child.material.needsUpdate = true;
           }
         }
@@ -842,9 +938,14 @@ function loadWizardCharacter(scene, playerGroup, onLoadingState) {
         }
       }
 
-      // Aura de fuego fatuo / magia arcana del mago
-      const wizardLight = new THREE.PointLight(0x38bdf8, 2.4, 7.5, 1.4);
-      wizardLight.position.set(0, 1.6, 0);
+      // Luz frontal de realce para rostro, báculo y vestiduras del mago
+      const wizardFillLight = new THREE.PointLight(0xfff7ed, 2.6, 6.0, 1.2);
+      wizardFillLight.position.set(0, 1.8, 1.4);
+      innerGroup.add(wizardFillLight);
+
+      // Aura / Rim light arcano en la espalda y hombros
+      const wizardLight = new THREE.PointLight(0x60a5fa, 3.4, 8.5, 1.2);
+      wizardLight.position.set(0, 2.0, -1.0);
       innerGroup.add(wizardLight);
 
       if (onLoadingState) onLoadingState(false);
@@ -906,69 +1007,236 @@ function loadWizardCharacter(scene, playerGroup, onLoadingState) {
 
 
 // ============================================================================
-// MODELO DE NPC (SABIOS Y GUARDIANES GÓTICOS / FIRE KEEPERS)
+// MODELOS 3D DE NPCs DE MISIONES
 // ============================================================================
-function createSoulsNPCMesh(accentColor) {
-  const group = new THREE.Group();
+const NPC_CONFIGS = {
+  npc_bsonia: {
+    modelFile: '/models/witch_hunter_in_long_coat_and_wide_hat.glb',
+    targetHeight: 2.3,
+    color: 0x10b981,
+    baseRotY: -Math.PI / 4,
+  },
+  npc_schemiel: {
+    modelFile: '/models/voidbound_necromancer.glb',
+    targetHeight: 2.35,
+    color: 0xf59e0b,
+    baseRotY: -3 * Math.PI / 4,
+  },
+  npc_relatia: {
+    modelFile: '/models/knight_artorias_and_great_grey_wolf_sif.glb',
+    targetHeight: 2.3,
+    color: 0x38bdf8,
+    baseRotY: Math.PI / 4,
+    brightness: 0.55,
+  },
+  npc_atlas: {
+    modelFile: '/models/knight_artorias.glb',
+    targetHeight: 2.45,
+    color: 0xa855f7,
+    baseRotY: 3 * Math.PI / 4,
+  },
+  npc_scribe: {
+    modelFile: '/models/ember_winged_fallen_angel_warrior.glb',
+    targetHeight: 2.2,
+    color: 0xf97316,
+    baseRotY: Math.PI / 4,
+  },
+  npc_archivist: {
+    modelFile: '/models/knight_artorias.glb',
+    targetHeight: 2.2,
+    color: 0xeab308,
+    baseRotY: -Math.PI / 4,
+  },
+  npc_gardener: {
+    modelFile: '/models/lowpoly_pbr_knight_armour.glb',
+    targetHeight: 2.2,
+    color: 0x22c55e,
+    baseRotY: Math.PI / 2,
+  },
+  npc_pathfinder: {
+    modelFile: '/models/mastercraft_mithril_armor_set_for_beyond_skyrim2.glb',
+    targetHeight: 2.2,
+    color: 0x06b6d4,
+    baseRotY: -Math.PI / 2,
+  },
+  npc_guardian: {
+    modelFile: '/models/dark_knight_-_hitem3d_hi3d_vs_supavoxel_test.glb',
+    targetHeight: 2.2,
+    color: 0x8b5cf6,
+    baseRotY: Math.PI,
+  },
+  npc_keeper: {
+    modelFile: '/models/fantasy_villager.glb',
+    targetHeight: 2.2,
+    color: 0xec4899,
+    baseRotY: 0,
+  },
+};
 
-  const robeMat = new THREE.MeshStandardMaterial({
-    color: 0x161c24,
-    roughness: 0.9,
+function buildSoulsNPCs(scene, zoneConfigs, loader) {
+  const npcMeshes = zoneConfigs.map((zc) => {
+    const config = NPC_CONFIGS[zc.npcId] || {
+      modelFile: '/models/witch_hunter_in_long_coat_and_wide_hat.glb',
+      targetHeight: 2.3,
+      color: zc.color,
+      baseRotY: -Math.PI / 4,
+    };
+
+    const group = new THREE.Group();
+    group.position.set(zc.x + 2.2, 0, zc.z);
+    group.rotation.y = config.baseRotY;
+
+    // Sombra de contacto suave en el piso
+    const shadowGeo = new THREE.PlaneGeometry(1.4, 1.4);
+    const shadowMat = new THREE.MeshBasicMaterial({
+      color: 0x05070a,
+      transparent: true,
+      opacity: 0.55,
+      depthWrite: false,
+    });
+    const shadow = new THREE.Mesh(shadowGeo, shadowMat);
+    shadow.rotation.x = -Math.PI / 2;
+    shadow.position.y = 0.02;
+    group.add(shadow);
+
+    // Ranura para el modelo 3D cargado
+    const modelSlot = new THREE.Group();
+    group.add(modelSlot);
+
+    // Silueta estilizada temporal mientras finaliza la carga del modelo
+    const placeholderGeo = new THREE.CylinderGeometry(0.26, 0.52, 1.7, 12);
+    const placeholderMat = new THREE.MeshStandardMaterial({
+      color: 0x161c24,
+      roughness: 0.8,
+      emissive: config.color,
+      emissiveIntensity: 0.35,
+      transparent: true,
+      opacity: 0.75,
+    });
+    const placeholderMesh = new THREE.Mesh(placeholderGeo, placeholderMat);
+    placeholderMesh.position.y = 0.85;
+    placeholderMesh.castShadow = true;
+    modelSlot.add(placeholderMesh);
+
+    // Aura mística de iluminación en el color representativo del NPC (brillo aumentado)
+    const auraLight = new THREE.PointLight(config.color, 3.2 * (config.brightness ?? 1), 7.5, 1.2);
+    auraLight.position.set(0, 2.0, 0);
+    group.add(auraLight);
+
+    // Luz frontal de realce suave para destacar rostro, ropaje y detalles de los modelos GLB
+    const npcFrontFill = new THREE.PointLight(0xfff8ee, 2.8 * (config.brightness ?? 1), 6.0, 1.2);
+    npcFrontFill.position.set(0, 1.8, 1.3);
+    group.add(npcFrontFill);
+
+    // Baliza / Marcador sutil de diálogo (Torus dorado flotante)
+    const markerGeo = new THREE.TorusGeometry(0.18, 0.04, 8, 20);
+    const markerMat = new THREE.MeshBasicMaterial({ color: 0xfbbf24 });
+    const marker = new THREE.Mesh(markerGeo, markerMat);
+    marker.position.set(zc.x + 2.2, 2.5, zc.z);
+    marker.rotation.x = -Math.PI / 2;
+    scene.add(marker);
+
+    const missionSign = zc.hasBonfire === false ? createBonfireMissionTitle(zc) : null;
+    if (missionSign) {
+      missionSign.sprite.position.y = 3.35;
+      group.add(missionSign.sprite);
+    }
+
+    scene.add(group);
+
+    return {
+      id: zc.npcId,
+      name: NPCS[zc.npcId]?.name,
+      title: NPCS[zc.npcId]?.title,
+      zoneId: zc.id,
+      config,
+      group,
+      modelSlot,
+      placeholderMesh,
+      marker,
+      missionSign,
+      worldPos: new THREE.Vector3(zc.x + 2.2, 0, zc.z),
+      baseRotY: config.baseRotY,
+    };
   });
-  const trimMat = new THREE.MeshStandardMaterial({
-    color: accentColor,
-    emissive: accentColor,
-    emissiveIntensity: 0.6,
-    roughness: 0.4,
+
+  // Cargar los archivos GLB de los modelos requeridos
+  const uniqueFiles = [...new Set(Object.values(NPC_CONFIGS).map((c) => c.modelFile))];
+
+  uniqueFiles.forEach((file) => {
+    loader.load(
+      file,
+      (gltf) => {
+        const model = gltf.scene;
+
+        // Configuración de sombras y materiales PBR con brillo realzado
+        model.traverse((child) => {
+          if (child.isMesh) {
+            child.castShadow = true;
+            child.receiveShadow = true;
+            if (child.material) {
+              child.material.roughness = Math.min(0.48, child.material.roughness ?? 0.6);
+              child.material.metalness = Math.min(0.4, child.material.metalness ?? 0.2);
+              // Multiplicador de brillo para que los NPCs resalten y se vean radiantes
+              if (child.material.color) {
+                child.material.color.multiplyScalar(1);
+              }
+              child.material.needsUpdate = true;
+            }
+          }
+        });
+
+        // Distribuir a los NPCs correspondientes
+        npcMeshes.forEach((npc) => {
+          if (npc.config.modelFile === file) {
+            // Remover silueta temporal
+            if (npc.placeholderMesh) {
+              npc.modelSlot.remove(npc.placeholderMesh);
+              npc.placeholderMesh.geometry.dispose();
+              npc.placeholderMesh.material.dispose();
+              npc.placeholderMesh = null;
+            }
+
+            // Clonar modelo y normalizar escala / anclaje
+            const instance = model.clone(true);
+            if (npc.config.brightness < 1) {
+              instance.traverse((child) => {
+                if (!child.isMesh || !child.material) return;
+                child.material = Array.isArray(child.material)
+                  ? child.material.map((material) => material.clone())
+                  : child.material.clone();
+                const materials = Array.isArray(child.material) ? child.material : [child.material];
+                materials.forEach((material) => {
+                  if (material.emissive) {
+                    material.emissiveIntensity *= npc.config.brightness;
+                  }
+                });
+              });
+            }
+            const initialBox = new THREE.Box3().setFromObject(instance);
+            const initialSize = initialBox.getSize(new THREE.Vector3());
+            const scale = npc.config.targetHeight / (initialSize.y || 1);
+            instance.scale.setScalar(scale);
+
+            instance.updateMatrixWorld(true);
+            const updatedBox = new THREE.Box3().setFromObject(instance);
+            const updatedCenter = updatedBox.getCenter(new THREE.Vector3());
+            instance.position.set(-updatedCenter.x, -updatedBox.min.y, -updatedCenter.z);
+
+            const wrapper = new THREE.Group();
+            wrapper.add(instance);
+            npc.modelSlot.add(wrapper);
+          }
+        });
+      },
+      undefined,
+      (err) => {
+        console.error(`Error al cargar modelo de NPC (${file}):`, err);
+      }
+    );
   });
 
-  // Túnica larga talar gótica
-  const robeGeo = new THREE.CylinderGeometry(0.28, 0.58, 1.6, 16);
-  const robe = new THREE.Mesh(robeGeo, robeMat);
-  robe.position.y = 0.8;
-  robe.castShadow = true;
-  group.add(robe);
-
-  // Cenefa de runas o ribete bordado
-  const trimGeo = new THREE.CylinderGeometry(0.585, 0.585, 0.15, 16);
-  const trim = new THREE.Mesh(trimGeo, trimMat);
-  trim.position.y = 0.1;
-  group.add(trim);
-
-  // Capucha profunda misteriosa
-  const hoodGeo = new THREE.SphereGeometry(0.24, 16, 16);
-  hoodGeo.scale(1, 1.25, 1.15);
-  const hood = new THREE.Mesh(hoodGeo, robeMat);
-  hood.position.y = 1.86;
-  hood.castShadow = true;
-  group.add(hood);
-
-  // Ojos brillantes arcanos en la oscuridad de la capucha
-  const eyeMat = new THREE.MeshBasicMaterial({ color: accentColor });
-  [-0.07, 0.07].forEach((ex) => {
-    const eye = new THREE.Mesh(new THREE.SphereGeometry(0.025, 8, 8), eyeMat);
-    eye.position.set(ex, 1.86, 0.19);
-    group.add(eye);
-  });
-
-  // Brazos con mangas anchas de monje / sabio
-  const armGeo = new THREE.CylinderGeometry(0.09, 0.18, 0.65, 8);
-  [-0.34, 0.34].forEach((ax) => {
-    const arm = new THREE.Mesh(armGeo, robeMat);
-    arm.position.set(ax, 1.2, 0.05);
-    arm.rotation.z = ax > 0 ? -0.2 : 0.2;
-    arm.castShadow = true;
-    group.add(arm);
-  });
-
-  // Grimorio / Catalizador arcano en mano
-  const bookGeo = new THREE.BoxGeometry(0.28, 0.36, 0.09);
-  const book = new THREE.Mesh(bookGeo, trimMat);
-  book.position.set(0.28, 0.9, 0.25);
-  book.rotation.y = -0.4;
-  group.add(book);
-
-  return { group };
+  return npcMeshes;
 }
 
 // ============================================================================
@@ -1018,6 +1286,7 @@ export default function GameCanvas3D({ player, onTalkNpc, onCollectItem, onZoneC
   const mountRef = useRef(null);
   const [nearbyPrompt, setNearbyPrompt] = useState(null);
   const [controlsHelp, setControlsHelp] = useState(true);
+  const [isDayTime, setIsDayTime] = useState(true);
 
   const stateRef = useRef({
     keys: { w: false, a: false, s: false, d: false, shift: false },
@@ -1032,6 +1301,15 @@ export default function GameCanvas3D({ player, onTalkNpc, onCollectItem, onZoneC
     walkPhase: 0,
     snowParticles: null,
     camLookTarget: new THREE.Vector3(0, 1.8, 0),
+    // Cámara orbital libre con mouse
+    camYaw: 0.0,
+    camPitch: 0.38,
+    camDist: 8.6,
+    isDraggingMouse: false,
+    prevMousePos: { x: 0, y: 0 },
+    // Ciclo Día / Noche (0.0 = Noche, 1.0 = Día)
+    dayFactor: 1.0,
+    targetDayFactor: 1.0,
     // Físicas de oscilador armónico amortiguado (Squash & Stretch)
     squashY: 1.0,
     squashVelY: 0.0,
@@ -1048,12 +1326,11 @@ export default function GameCanvas3D({ player, onTalkNpc, onCollectItem, onZoneC
     const width = mount.clientWidth || window.innerWidth;
     const height = mount.clientHeight || window.innerHeight;
 
-    // ─── 1. ESCENA Y NIEBLA GÓTICA DE IRITHYLL ───────────────────
+    // ─── 1. ESCENA Y NIEBLA DINÁMICA DE IRITHYLL ────────────────
     const scene = new THREE.Scene();
-    // Atmósfera de cielo nocturno frío, neblina azul-ceniza profunda de Irithyll
     const skyColor = new THREE.Color(0x0c131d);
     scene.background = skyColor;
-    scene.fog = new THREE.FogExp2(0x0d1522, 0.022);
+    scene.fog = new THREE.FogExp2(0x0d1522, 0.020);
 
     // ─── 2. CÁMARA TERCERA PERSONA ─────────────────────────────
     const camera = new THREE.PerspectiveCamera(54, width / height, 0.1, 260);
@@ -1066,10 +1343,10 @@ export default function GameCanvas3D({ player, onTalkNpc, onCollectItem, onZoneC
     renderer.shadowMap.enabled = true;
     renderer.shadowMap.type = THREE.PCFSoftShadowMap;
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    renderer.toneMappingExposure = 1.15;
+    renderer.toneMappingExposure = 1.22;
     mount.appendChild(renderer.domElement);
 
-    // ─── 4. LUNA GÉLIDA Y CIELO NOCTURNO ESTRELLADO ─────────────
+    // ─── 4. LUNA, SOL Y CIELO ESTRELLADO ────────────────────────
     const starGeo = new THREE.BufferGeometry();
     const starCount = 1800;
     const starPos = new Float32Array(starCount * 3);
@@ -1083,7 +1360,8 @@ export default function GameCanvas3D({ player, onTalkNpc, onCollectItem, onZoneC
     }
     starGeo.setAttribute('position', new THREE.BufferAttribute(starPos, 3));
     const starMat = new THREE.PointsMaterial({ color: 0xc8d8e8, size: 0.32, transparent: true, opacity: 0.75 });
-    scene.add(new THREE.Points(starGeo, starMat));
+    const starPoints = new THREE.Points(starGeo, starMat);
+    scene.add(starPoints);
 
     // Esfera lunar de Irithyll
     const moonGeo = new THREE.SphereGeometry(6.5, 32, 32);
@@ -1097,26 +1375,49 @@ export default function GameCanvas3D({ player, onTalkNpc, onCollectItem, onZoneC
     moon.position.set(-35, 65, -85);
     scene.add(moon);
 
-    // ─── 5. ILUMINACIÓN CLAROSCURO DARK SOULS ───────────────────
-    // Luz ambiental de hemisferio: cielo azul gélido y suelo de piedra carbón
-    const hemiLight = new THREE.HemisphereLight(0x1a2638, 0x090d14, 0.95);
+    // Sol radiante diurno
+    const sunGeo = new THREE.SphereGeometry(7.0, 32, 32);
+    const sunMat = new THREE.MeshBasicMaterial({ color: 0xfff3b0 });
+    const sun = new THREE.Mesh(sunGeo, sunMat);
+    sun.position.set(35, -45, 75);
+    scene.add(sun);
+
+    // ─── 5. ILUMINACIÓN DINÁMICA (CICLO DÍA / NOCHE) ────────────
+    const hemiLight = new THREE.HemisphereLight(0x1a2638, 0x090d14, 1.15);
     scene.add(hemiLight);
 
-    // Luz de luna direccional (sombras largas y marcadas)
-    const moonLight = new THREE.DirectionalLight(0x9eb8d4, 1.6);
-    moonLight.position.set(-25, 45, -30);
-    moonLight.castShadow = true;
-    moonLight.shadow.mapSize.width = 2048;
-    moonLight.shadow.mapSize.height = 2048;
-    moonLight.shadow.camera.near = 0.5;
-    moonLight.shadow.camera.far = 130;
+    const mainDirLight = new THREE.DirectionalLight(0x9eb8d4, 1.7);
+    mainDirLight.position.set(-25, 45, -30);
+    mainDirLight.castShadow = true;
+    mainDirLight.shadow.mapSize.width = 2048;
+    mainDirLight.shadow.mapSize.height = 2048;
+    mainDirLight.shadow.camera.near = 0.5;
+    mainDirLight.shadow.camera.far = 130;
     const shadowDist = 42;
-    moonLight.shadow.camera.left = -shadowDist;
-    moonLight.shadow.camera.right = shadowDist;
-    moonLight.shadow.camera.top = shadowDist;
-    moonLight.shadow.camera.bottom = -shadowDist;
-    moonLight.shadow.bias = -0.0005;
-    scene.add(moonLight);
+    mainDirLight.shadow.camera.left = -shadowDist;
+    mainDirLight.shadow.camera.right = shadowDist;
+    mainDirLight.shadow.camera.top = shadowDist;
+    mainDirLight.shadow.camera.bottom = -shadowDist;
+    mainDirLight.shadow.bias = -0.0005;
+    scene.add(mainDirLight);
+
+    // Paletas de color para lerp suave día/noche
+    const nightSkyColor = new THREE.Color(0x0c131d);
+    const daySkyColor = new THREE.Color(0x5688c7);
+
+    const nightFogColor = new THREE.Color(0x0d1522);
+    const dayFogColor = new THREE.Color(0x7da8d7);
+
+    const nightHemiSky = new THREE.Color(0x1a2638);
+    const dayHemiSky = new THREE.Color(0xfff3db);
+    const nightHemiGround = new THREE.Color(0x090d14);
+    const dayHemiGround = new THREE.Color(0x524e49);
+
+    const nightDirColor = new THREE.Color(0x9eb8d4);
+    const dayDirColor = new THREE.Color(0xffeed0);
+
+    const nightDirPos = new THREE.Vector3(-25, 45, -30);
+    const dayDirPos = new THREE.Vector3(30, 55, 25);
 
     // ─── 6. PARTÍCULAS DE NIEVE Y CENIZA GÉLIDA (BLIZZARD) ──────
     const snowCount = 1400;
@@ -1148,47 +1449,133 @@ export default function GameCanvas3D({ player, onTalkNpc, onCollectItem, onZoneC
 
     // ─── 8. HOGUERAS DE ZONA (BONFIRES) ─────────────────────────
     const zoneConfigs = [
-      { id: 'zone_bson',      name: 'Hoguera del Archivo BSON',       x: -16, z: -14, color: 0x10b981, npcId: 'npc_bsonia' },
-      { id: 'zone_mongoose',  name: 'Hoguera de la Forja de Esquemas', x: 16,  z: -14, color: 0xf59e0b, npcId: 'npc_schemiel' },
-      { id: 'zone_relations', name: 'Hoguera de la Torre de Enlaces',  x: -16, z: 14,  color: 0x38bdf8, npcId: 'npc_relatia' },
-      { id: 'zone_sanctum',   name: 'Hoguera del Santuario de Atlas',  x: 16,  z: 14,  color: 0xa855f7, npcId: 'npc_atlas' },
+      {
+        id: 'zone_bson',
+        name: 'Hoguera del Archivo BSON',
+        x: -16,
+        z: -14,
+        color: 0x10b981,
+        npcId: 'npc_bsonia',
+        questId: 'quest_1',
+        questTitle: 'Misión I: El Catálogo Desordenado',
+        questTopic: 'MongoDB & Documentos BSON',
+      },
+      {
+        id: 'zone_mongoose',
+        name: 'Hoguera de la Forja de Esquemas',
+        x: 16,
+        z: -14,
+        color: 0xf59e0b,
+        npcId: 'npc_schemiel',
+        questId: 'quest_2',
+        questTitle: 'Misión II: El Sello de Validación',
+        questTopic: 'Mongoose ODM & Schemas',
+      },
+      {
+        id: 'zone_relations',
+        name: 'Hoguera de la Torre de Enlaces',
+        x: -16,
+        z: 14,
+        color: 0x38bdf8,
+        npcId: 'npc_relatia',
+        questId: 'quest_3',
+        questTitle: 'Misión III: El Dilema de las Relaciones',
+        questTopic: 'Modelado: Subdocumentos vs ObjectId',
+      },
+      {
+        id: 'zone_sanctum',
+        name: 'Hoguera del Santuario del Custodio',
+        x: 16,
+        z: 14,
+        color: 0xa855f7,
+        npcId: 'npc_atlas',
+        questId: 'quest_4',
+        questTitle: 'Misión Final: El Juicio del Custodio',
+        questTopic: 'Prueba Integradora y Graduación',
+      },
+      {
+        id: 'zone_document_hall',
+        name: 'Galería de Claves y Valores',
+        x: -3,
+        z: -23,
+        color: 0xf97316,
+        npcId: 'npc_scribe',
+        questId: 'quest_5',
+        questTitle: 'Misión Secundaria: El Archivo de Claves',
+        questTopic: 'Estructura de documentos',
+        hasBonfire: false,
+      },
+      {
+        id: 'zone_bson_archive',
+        name: 'Archivo de Tipos BSON',
+        x: 13,
+        z: -19,
+        color: 0xeab308,
+        npcId: 'npc_archivist',
+        questId: 'quest_6',
+        questTitle: 'Misión Secundaria: El Espejo BSON',
+        questTopic: 'BSON y tipos de datos',
+        hasBonfire: false,
+      },
+      {
+        id: 'zone_nested_garden',
+        name: 'Jardín de Documentos Anidados',
+        x: 22,
+        z: -1,
+        color: 0x22c55e,
+        npcId: 'npc_gardener',
+        questId: 'quest_7',
+        questTitle: 'Misión Secundaria: El Jardín Anidado',
+        questTopic: 'Documentos y arreglos',
+        hasBonfire: false,
+      },
+      {
+        id: 'zone_dot_tower',
+        name: 'Torre de la Notación de Puntos',
+        x: 13,
+        z: 19,
+        color: 0x06b6d4,
+        npcId: 'npc_pathfinder',
+        questId: 'quest_8',
+        questTitle: 'Misión Secundaria: La Ruta de los Puntos',
+        questTopic: 'Campos anidados y arreglos',
+        hasBonfire: false,
+      },
+      {
+        id: 'zone_id_vault',
+        name: 'Bóveda de Identificadores',
+        x: -13,
+        z: 19,
+        color: 0x8b5cf6,
+        npcId: 'npc_guardian',
+        questId: 'quest_9',
+        questTitle: 'Misión Secundaria: La Bóveda de _id',
+        questTopic: '_id y nombres de campo',
+        hasBonfire: false,
+      },
+      {
+        id: 'zone_gridfs_gate',
+        name: 'Umbral de GridFS',
+        x: -22,
+        z: -1,
+        color: 0xec4899,
+        npcId: 'npc_keeper',
+        questId: 'quest_10',
+        questTitle: 'Misión Secundaria: El Umbral de 16 MiB',
+        questTopic: 'Tamaño de documentos',
+        hasBonfire: false,
+      },
     ];
 
-    const bonfireObjects = zoneConfigs.map((zc) => buildSoulsBonfire(scene, zc));
+    const gltfLoader = new GLTFLoader();
+    const bonfireObjects = buildSoulsBonfires(
+      scene,
+      zoneConfigs.filter((zone) => zone.hasBonfire !== false),
+      gltfLoader
+    );
 
     // ─── 9. NPCs DE DARK SOULS (SABIOS Y CUSTODIOS) ─────────────
-    const npcColors = {
-      npc_bsonia:   0x10b981,
-      npc_schemiel: 0xf59e0b,
-      npc_relatia:  0x38bdf8,
-      npc_atlas:    0xa855f7,
-    };
-
-    const npcMeshes = zoneConfigs.map((zc) => {
-      const npcData = createSoulsNPCMesh(npcColors[zc.npcId]);
-      npcData.group.position.set(zc.x + 2.2, 0, zc.z);
-      npcData.group.rotation.y = -Math.PI / 4;
-      scene.add(npcData.group);
-
-      // Baliza / Marcador sutil de diálogo
-      const markerGeo = new THREE.TorusGeometry(0.18, 0.04, 8, 20);
-      const markerMat = new THREE.MeshBasicMaterial({ color: 0xfbbf24 });
-      const marker = new THREE.Mesh(markerGeo, markerMat);
-      marker.position.set(zc.x + 2.2, 2.5, zc.z);
-      marker.rotation.x = -Math.PI / 2;
-      scene.add(marker);
-
-      return {
-        id: zc.npcId,
-        name: NPCS[zc.npcId]?.name,
-        title: NPCS[zc.npcId]?.title,
-        zoneId: zc.id,
-        group: npcData.group,
-        marker,
-        worldPos: new THREE.Vector3(zc.x + 2.2, 0, zc.z),
-      };
-    });
-
+    const npcMeshes = buildSoulsNPCs(scene, zoneConfigs, gltfLoader);
     stateRef.current.npcObjects = npcMeshes;
 
     // ─── 10. ALMAS Y RUNAS COLECCIONABLES ───────────────────────
@@ -1253,6 +1640,61 @@ export default function GameCanvas3D({ player, onTalkNpc, onCollectItem, onZoneC
     window.addEventListener('keydown', handleKeyDown);
     window.addEventListener('keyup', handleKeyUp);
 
+    // ─── 13. CONTROL DE CÁMARA LIBRE CON MOUSE (ROTACIÓN Y ZOOM) ──
+    const handlePointerDown = (e) => {
+      // Ignorar clicks si provienen de botones UI superpuestos
+      if (e.target !== renderer.domElement) return;
+      stateRef.current.isDraggingMouse = true;
+      stateRef.current.prevMousePos = { x: e.clientX, y: e.clientY };
+      renderer.domElement.style.cursor = 'grabbing';
+    };
+
+    const handlePointerMove = (e) => {
+      if (!stateRef.current.isDraggingMouse) return;
+      const dx = e.clientX - stateRef.current.prevMousePos.x;
+      const dy = e.clientY - stateRef.current.prevMousePos.y;
+      stateRef.current.prevMousePos = { x: e.clientX, y: e.clientY };
+
+      const rotSpeed = 0.0055;
+      stateRef.current.camYaw -= dx * rotSpeed;
+      stateRef.current.camPitch += dy * rotSpeed;
+
+      // Clampear pitch vertical para vista limpia (sin pasar bajo el suelo ni invertir)
+      stateRef.current.camPitch = THREE.MathUtils.clamp(
+        stateRef.current.camPitch,
+        0.06,
+        1.32
+      );
+    };
+
+    const handlePointerUp = () => {
+      stateRef.current.isDraggingMouse = false;
+      if (renderer.domElement) {
+        renderer.domElement.style.cursor = 'grab';
+      }
+    };
+
+    const handleWheel = (e) => {
+      e.preventDefault();
+      stateRef.current.camDist = THREE.MathUtils.clamp(
+        stateRef.current.camDist + e.deltaY * 0.008,
+        4.2,
+        16.5
+      );
+    };
+
+    const handleContextMenu = (e) => e.preventDefault();
+
+    renderer.domElement.style.cursor = 'grab';
+    renderer.domElement.style.touchAction = 'none';
+
+    renderer.domElement.addEventListener('pointerdown', handlePointerDown);
+    window.addEventListener('pointermove', handlePointerMove);
+    window.addEventListener('pointerup', handlePointerUp);
+    window.addEventListener('pointercancel', handlePointerUp);
+    mount.addEventListener('wheel', handleWheel, { passive: false });
+    renderer.domElement.addEventListener('contextmenu', handleContextMenu);
+
     // ─── 13. MOTOR DE FÍSICA Y ANIMACIÓN CINEMATOGRÁFICA ─────────
     let raf;
     const clock = new THREE.Clock();
@@ -1262,12 +1704,16 @@ export default function GameCanvas3D({ player, onTalkNpc, onCollectItem, onZoneC
       const delta = Math.min(clock.getDelta(), 0.05);
       const t = clock.getElapsedTime();
 
-      // Animación de hogueras (fuego parpadeante y ascuas)
+      // Animación de hogueras y títulos flotantes de misión
       bonfireObjects.forEach((bf, i) => {
-        const flicker = 1.0 + Math.sin(t * 12 + i * 2.5) * 0.18 + Math.cos(t * 23) * 0.08;
-        bf.bonfireLight.intensity = 3.6 * flicker;
-        bf.fireCore.scale.setScalar(0.95 + Math.sin(t * 8 + i) * 0.12);
-        bf.runeCircle.rotation.z = t * 0.25;
+        if (bf.bonfireLight) {
+          const flicker = 1.0 + Math.sin(t * 5 + i * 2.0) * 0.1;
+          bf.bonfireLight.intensity = 1.8 * flicker;
+        }
+        if (bf.runeCircle) bf.runeCircle.rotation.z = t * 0.2;
+        if (bf.titleSprite) {
+          bf.titleSprite.position.y = 2.95 + Math.sin(t * 2.2 + i * 1.5) * 0.08;
+        }
       });
 
       // Animación de nieve y ventisca de Irithyll
@@ -1284,10 +1730,30 @@ export default function GameCanvas3D({ player, onTalkNpc, onCollectItem, onZoneC
         pos.needsUpdate = true;
       }
 
-      // Animación de NPCs (respiración solemne y baliza)
+      // Animación de NPCs (respiración solemne, orientación hacia el jugador y baliza)
       npcMeshes.forEach((npc, i) => {
         npc.marker.position.y = 2.5 + Math.sin(t * 2.2 + i) * 0.12;
         npc.marker.rotation.z = t * 1.2;
+        if (npc.missionSign) {
+          npc.missionSign.sprite.position.y = 3.35 + Math.sin(t * 2.2 + i * 1.5) * 0.08;
+        }
+
+        // Orientación dinámica hacia el jugador cuando está en proximidad (< 6.5m)
+        const distToPlayer = playerGroup.position.distanceTo(npc.worldPos);
+        let targetAngle = npc.baseRotY;
+        if (distToPlayer < 6.5) {
+          const dx = playerGroup.position.x - npc.worldPos.x;
+          const dz = playerGroup.position.z - npc.worldPos.z;
+          targetAngle = Math.atan2(dx, dz);
+        }
+        let diff = targetAngle - npc.group.rotation.y;
+        while (diff > Math.PI) diff -= Math.PI * 2;
+        while (diff < -Math.PI) diff += Math.PI * 2;
+        npc.group.rotation.y += diff * Math.min(1, 3.5 * delta);
+
+        if (npc.modelSlot) {
+          npc.modelSlot.position.y = Math.sin(t * 1.8 + i) * 0.02;
+        }
       });
 
       // Coleccionables (almas que levitan y giran)
@@ -1316,14 +1782,16 @@ export default function GameCanvas3D({ player, onTalkNpc, onCollectItem, onZoneC
       const maxRunSpeed = 9.5;
       const topSpeed = keys.shift ? maxRunSpeed : maxWalkSpeed;
 
-      // Vector de entrada de dirección
+      // Vector de entrada de dirección relativo a la orientación de la cámara libre
+      const rawX = (keys.d ? 1 : 0) - (keys.a ? 1 : 0);
+      const rawZ = (keys.s ? 1 : 0) - (keys.w ? 1 : 0);
       const inputDir = new THREE.Vector3();
-      if (keys.w) inputDir.z -= 1;
-      if (keys.s) inputDir.z += 1;
-      if (keys.a) inputDir.x -= 1;
-      if (keys.d) inputDir.x += 1;
-      const hasInput = inputDir.lengthSq() > 0;
-      if (hasInput) inputDir.normalize();
+      const hasInput = rawX !== 0 || rawZ !== 0;
+      if (hasInput) {
+        // Rotar el input según el ángulo horizontal (camYaw) de la cámara
+        const inputAngle = Math.atan2(rawX, rawZ) + stateRef.current.camYaw;
+        inputDir.set(Math.sin(inputAngle), 0, Math.cos(inputAngle)).normalize();
+      }
 
       // Cálculo de aceleración y resistencia física
       if (isGrounded) {
@@ -1493,24 +1961,30 @@ export default function GameCanvas3D({ player, onTalkNpc, onCollectItem, onZoneC
         playerData.updateAnimation(currentSpeed, isGrounded, delta);
       }
 
-      // ─── CÁMARA SPRING-ARM FLUIDA CON ANTICIPACIÓN (LOOK-AHEAD) ───
-      const sprintCamPull = (currentSpeed / maxRunSpeed) * 1.2;
-      const targetCamDist = 8.6 + sprintCamPull;
-      const targetCamHeight = 4.8 + playerGroup.position.y * 0.35;
-      const idealCamPos = new THREE.Vector3(
-        playerGroup.position.x,
-        targetCamHeight,
-        playerGroup.position.z + targetCamDist
-      );
-      camera.position.lerp(idealCamPos, 6.0 * delta);
+      // ─── CÁMARA SPRING-ARM ORBITAL LIBRE CON ANTICIPACIÓN (LOOK-AHEAD) ───
+      const sprintCamPull = (currentSpeed / maxRunSpeed) * 1.0;
+      const effectiveDist = stateRef.current.camDist + sprintCamPull;
 
-      // Objetivo de mirada con anticipación hacia donde se mueve el personaje
+      // Objetivo de mirada hacia el personaje con anticipación sutil
       const targetLook = new THREE.Vector3(
-        playerGroup.position.x + vel.x * 0.12,
-        playerGroup.position.y + 1.8,
-        playerGroup.position.z + vel.z * 0.12
+        playerGroup.position.x + vel.x * 0.08,
+        playerGroup.position.y + 1.85,
+        playerGroup.position.z + vel.z * 0.08
       );
-      stateRef.current.camLookTarget.lerp(targetLook, 8.5 * delta);
+      stateRef.current.camLookTarget.lerp(targetLook, 9.0 * delta);
+
+      // Coordenadas esféricas de la cámara alrededor del punto de mira
+      const cosPitch = Math.cos(stateRef.current.camPitch);
+      const sinPitch = Math.sin(stateRef.current.camPitch);
+      const sinYaw = Math.sin(stateRef.current.camYaw);
+      const cosYaw = Math.cos(stateRef.current.camYaw);
+
+      const idealCamPos = new THREE.Vector3(
+        stateRef.current.camLookTarget.x + effectiveDist * cosPitch * sinYaw,
+        stateRef.current.camLookTarget.y + effectiveDist * sinPitch,
+        stateRef.current.camLookTarget.z + effectiveDist * cosPitch * cosYaw
+      );
+      camera.position.lerp(idealCamPos, 10.0 * delta);
       camera.lookAt(stateRef.current.camLookTarget);
 
       // ─── INTERACCIÓN DE HOGUERAS Y SABIOS ─────────────────────
@@ -1533,6 +2007,34 @@ export default function GameCanvas3D({ player, onTalkNpc, onCollectItem, onZoneC
         }
       });
 
+      // ─── TRANSICIÓN CINEMATOGRÁFICA DÍA / NOCHE (LERP) ─────────
+      stateRef.current.dayFactor = THREE.MathUtils.lerp(
+        stateRef.current.dayFactor,
+        stateRef.current.targetDayFactor,
+        2.2 * delta
+      );
+      const df = stateRef.current.dayFactor;
+
+      scene.background.lerpColors(nightSkyColor, daySkyColor, df);
+      scene.fog.color.lerpColors(nightFogColor, dayFogColor, df);
+      scene.fog.density = THREE.MathUtils.lerp(0.020, 0.009, df);
+
+      hemiLight.color.lerpColors(nightHemiSky, dayHemiSky, df);
+      hemiLight.groundColor.lerpColors(nightHemiGround, dayHemiGround, df);
+      hemiLight.intensity = THREE.MathUtils.lerp(1.15, 1.85, df);
+
+      mainDirLight.color.lerpColors(nightDirColor, dayDirColor, df);
+      mainDirLight.intensity = THREE.MathUtils.lerp(1.7, 3.2, df);
+      mainDirLight.position.lerpVectors(nightDirPos, dayDirPos, df);
+
+      moon.position.y = THREE.MathUtils.lerp(65, -45, df);
+      sun.position.y = THREE.MathUtils.lerp(-45, 65, df);
+
+      starMat.opacity = Math.max(0, 0.75 * (1.0 - df * 1.6));
+      if (stateRef.current.snowParticles) {
+        stateRef.current.snowParticles.points.material.opacity = THREE.MathUtils.lerp(0.7, 0.22, df);
+      }
+
       renderer.render(scene, camera);
     };
 
@@ -1551,7 +2053,23 @@ export default function GameCanvas3D({ player, onTalkNpc, onCollectItem, onZoneC
       window.removeEventListener('keydown', handleKeyDown);
       window.removeEventListener('keyup', handleKeyUp);
       window.removeEventListener('resize', handleResize);
+      if (renderer.domElement) {
+        renderer.domElement.removeEventListener('pointerdown', handlePointerDown);
+        renderer.domElement.removeEventListener('contextmenu', handleContextMenu);
+      }
+      window.removeEventListener('pointermove', handlePointerMove);
+      window.removeEventListener('pointerup', handlePointerUp);
+      window.removeEventListener('pointercancel', handlePointerUp);
+      mount.removeEventListener('wheel', handleWheel);
       playerData.dispose();
+      bonfireObjects.forEach((bf) => {
+        if (bf.titleTexture) bf.titleTexture.dispose();
+        if (bf.titleMat) bf.titleMat.dispose();
+      });
+      npcMeshes.forEach((npc) => {
+        if (npc.missionSign?.texture) npc.missionSign.texture.dispose();
+        if (npc.missionSign?.mat) npc.missionSign.mat.dispose();
+      });
       if (mount && renderer.domElement && mount.contains(renderer.domElement)) {
         mount.removeChild(renderer.domElement);
       }
@@ -1561,6 +2079,26 @@ export default function GameCanvas3D({ player, onTalkNpc, onCollectItem, onZoneC
 
   return (
     <div className="canvas-3d-wrapper souls-theme" ref={mountRef}>
+      {/* Botón de Transición Día / Noche */}
+      <div className="souls-environment-bar">
+        <button
+          type="button"
+          className={`souls-btn-daynight ${isDayTime ? 'is-day' : 'is-night'}`}
+          onClick={() => {
+            sound.playSelect();
+            setIsDayTime((prev) => {
+              const next = !prev;
+              stateRef.current.targetDayFactor = next ? 1.0 : 0.0;
+              return next;
+            });
+          }}
+          title="Alternar ciclo Día / Noche en tiempo real"
+        >
+          <span className="daynight-icon">{isDayTime ? '☀️' : '🌙'}</span>
+          <span className="daynight-label">{isDayTime ? 'Modo Día' : 'Modo Noche'}</span>
+        </button>
+      </div>
+
       {/* Banner de Interacción Estilo Dark Souls 3 */}
       {nearbyPrompt && (
         <div className="souls-prompt-interact">
@@ -1591,6 +2129,14 @@ export default function GameCanvas3D({ player, onTalkNpc, onCollectItem, onZoneC
         </div>
         {controlsHelp && (
           <div className="legend-body">
+            <div className="legend-row">
+              <span className="key-tag">Mouse</span>
+              <span>Arrastrar para girar cámara libre</span>
+            </div>
+            <div className="legend-row">
+              <span className="key-tag">Rueda</span>
+              <span>Zoom alejar / acercar</span>
+            </div>
             <div className="legend-row">
               <span className="key-tag">W</span><span className="key-tag">A</span><span className="key-tag">S</span><span className="key-tag">D</span>
               <span>Mover al Latente</span>

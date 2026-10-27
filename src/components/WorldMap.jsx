@@ -28,8 +28,8 @@ export default function WorldMap({
           const isCurrent = player.currentZoneId === zone.id;
           const isCompleted = player.completedQuests.includes(quest?.id);
           
-          // Bloqueo progresivo: la zona 4 (Sanctum) se desbloquea tras completar las primeras 3
-          const isLocked = zone.id === 'zone_sanctum' && player.completedQuests.length < 3;
+          const isLocked = zone.requiresCoreQuests
+            && !['quest_1', 'quest_2', 'quest_3'].every((questId) => player.completedQuests.includes(questId));
 
           return (
             <article

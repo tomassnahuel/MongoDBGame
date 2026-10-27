@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { sound } from '../utils/audio';
+import { RANKS } from '../data/gameData';
 
 export default function HUD({
   player,
@@ -16,18 +17,13 @@ export default function HUD({
     setMuted(isMuted);
   };
 
-  const prevXpNeeded = currentRank ? (currentRank.level === 1 ? 0 : RANKS_PREV(currentRank.level)) : 0;
+  const prevXpNeeded = currentRank
+    ? RANKS.find((rank) => rank.level === currentRank.level - 1)?.xpNeeded || 0
+    : 0;
   const nextXpNeeded = nextRank ? nextRank.xpNeeded : 1000;
   const xpCurrentLevel = Math.max(0, player.xp - prevXpNeeded);
   const xpSpan = Math.max(1, nextXpNeeded - prevXpNeeded);
   const xpPercent = Math.min(100, Math.round((xpCurrentLevel / xpSpan) * 100));
-
-  function RANKS_PREV(level) {
-    if (level === 2) return 100;
-    if (level === 3) return 250;
-    if (level === 4) return 450;
-    return 700;
-  }
 
   const handleReset = () => {
     if (window.confirm('¿Deseas reavivar la llama desde el inicio (Nivel 1)?')) {

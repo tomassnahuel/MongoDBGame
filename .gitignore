@@ -25,5 +25,6 @@ dist-ssr
 
 # Scratch and Large models (>100MB)
 scratch/
-public/models/corrupted_fallen_priest_-_dark_fantasy.glb
+public/models/kamababa_-_the_cauldron_grandma.glb
+public/models/witch_hunter_in_long_coat_and_wide_hat.glb
 

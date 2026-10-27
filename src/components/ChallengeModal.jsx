@@ -35,6 +35,8 @@ export default function ChallengeModal({
   const [q4Step2, setQ4Step2] = useState(null);
   const [q4Step3, setQ4Step3] = useState(null);
   const [q4Tested, setQ4Tested] = useState(false);
+  const [documentAnswer, setDocumentAnswer] = useState(null);
+  const [documentQuizSolved, setDocumentQuizSolved] = useState(false);
 
   // Feedback general del desafío
   const [feedback, setFeedback] = useState(null);
@@ -177,6 +179,34 @@ export default function ChallengeModal({
     setFeedback({
       status: 'success',
       text: '¡Juicio del Custodio superado con honores! Has demostrado comprensión profunda de MongoDB, diseño de Schemas con Mongoose y modelado escalable de datos.'
+    });
+  };
+
+  const handleExecuteDocumentQuiz = () => {
+    sound.playSelect();
+    if (!documentAnswer) {
+      sound.playError();
+      setFeedback({
+        status: 'error',
+        text: 'Elige una respuesta antes de comprobar el códice.'
+      });
+      return;
+    }
+
+    if (documentAnswer !== quest.challenge.answer) {
+      sound.playError();
+      setFeedback({
+        status: 'error',
+        text: quest.challenge.hint
+      });
+      return;
+    }
+
+    setDocumentQuizSolved(true);
+    sound.playSuccess();
+    setFeedback({
+      status: 'success',
+      text: quest.challenge.explanation
     });
   };
 
@@ -553,6 +583,50 @@ export default function ChallengeModal({
               </div>
             )}
 
+            {quest.type === 'document_quiz' && (
+              <div className="challenge-form">
+                <div className="form-section">
+                  <label className="form-label">{quest.challenge.prompt}</label>
+                  <div className="options-radio-group">
+                    {quest.challenge.options.map((option) => (
+                      <label
+                        key={option.id}
+                        className={`radio-pill ${documentAnswer === option.id ? 'pill-selected' : ''}`}
+                      >
+                        <input
+                          type="radio"
+                          name={`document-quiz-${quest.id}`}
+                          checked={documentAnswer === option.id}
+                          onChange={() => setDocumentAnswer(option.id)}
+                        />
+                        <span>{option.label}</span>
+                      </label>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="form-actions">
+                  {!documentQuizSolved ? (
+                    <button type="button" className="btn-invoke-magic" onClick={handleExecuteDocumentQuiz}>
+                      🔎 Comprobar respuesta
+                    </button>
+                  ) : (
+                    <button type="button" className="btn-claim-reward" onClick={handleFinishAndClaim}>
+                      🎉 Reclamar recompensa y +{quest.xpReward} EXP
+                    </button>
+                  )}
+                </div>
+                <a
+                  className="document-quiz-source"
+                  href={quest.sourceUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  Consultar documentación oficial de MongoDB ↗
+                </a>
+              </div>
+            )}
+
             {/* CAJA DE FEEDBACK INMEDIATO */}
             {feedback && (
               <div className={`feedback-alert ${feedback.status === 'success' ? 'feedback-success' : 'feedback-error'}`}>
@@ -675,6 +749,18 @@ export default function ChallengeModal({
   : `// Aguardando el veredicto del Gran Custodio...
 // Revisa tus respuestas a la izquierda y presiona el botón.`}
                   </pre>
+                </>
+              )}
+
+              {quest.type === 'document_quiz' && (
+                <>
+                  <div className="console-tag">Ejemplo del Códice — Documentos BSON</div>
+                  <pre className="code-display">{quest.challenge.example}</pre>
+                  <div className="console-note-success">
+                    {documentQuizSolved
+                      ? '✓ Respuesta correcta. El concepto quedó registrado en el códice.'
+                      : 'Analiza el ejemplo y elige una respuesta para continuar.'}
+                  </div>
                 </>
               )}
             </div>
