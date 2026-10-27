@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useGameState } from './hooks/useGameState';
 import HUD from './components/HUD';
 import GameCanvas3D from './components/GameCanvas3D';
@@ -42,6 +42,8 @@ export default function App() {
   const [viewMode, setViewMode] = useState('3d'); // '3d' | 'map'
   const [showTouchControls, setShowTouchControls] = useState(false);
   const [health, setHealth] = useState(100);
+  const [isDead, setIsDead] = useState(false);
+  const deathHandled = useRef(false);
 
   const activeNpc = NPCS[activeNpcId];
   const isQuestDone = activeNpc ? player.completedQuests.includes(activeNpc.questId) : false;
@@ -54,6 +56,27 @@ export default function App() {
     setHealth(100);
     resetGame();
   };
+
+  const resetGameRef = useRef(handleResetGame);
+
+  useEffect(() => {
+    resetGameRef.current = handleResetGame;
+  });
+
+  useEffect(() => {
+    if (health > 0 || deathHandled.current) return undefined;
+
+    deathHandled.current = true;
+    setIsDead(true);
+
+    const resetTimeout = window.setTimeout(() => {
+      resetGameRef.current();
+      setIsDead(false);
+      deathHandled.current = false;
+    }, 1800);
+
+    return () => window.clearTimeout(resetTimeout);
+  }, [health]);
 
   // Manejar recolección de pergaminos/runas 3D en el mundo
   const handleCollect3DItem = (item) => {
@@ -197,6 +220,16 @@ export default function App() {
           onRestart={handleResetGame}
           onClose={() => setShowVictory(false)}
         />
+      )}
+
+      {isDead && (
+        <div className="modal-backdrop death-backdrop" role="alertdialog" aria-modal="true">
+          <div className="death-message">
+            <span className="death-icon" aria-hidden="true">☠</span>
+            <h1>Has muerto</h1>
+            <p>La aventura volverá a comenzar...</p>
+          </div>
+        </div>
       )}
     </div>
   );

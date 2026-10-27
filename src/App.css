@@ -516,6 +516,37 @@
   animation: fadeIn 0.2s ease;
 }
 
+.death-backdrop {
+  z-index: 100;
+}
+
+.death-message {
+  color: #f8fafc;
+  text-align: center;
+  animation: scaleUp 0.25s ease;
+}
+
+.death-icon {
+  color: #ef4444;
+  display: block;
+  font-size: 4rem;
+  margin-bottom: 0.5rem;
+  text-shadow: 0 0 24px rgba(239, 68, 68, 0.55);
+}
+
+.death-message h1 {
+  color: #ef4444;
+  font-family: var(--font-fantasy);
+  font-size: clamp(2.5rem, 8vw, 4.5rem);
+  margin: 0;
+  text-transform: uppercase;
+}
+
+.death-message p {
+  color: #cbd5e1;
+  margin-top: 0.75rem;
+}
+
 @keyframes fadeIn {
   from { opacity: 0; }
   to { opacity: 1; }
