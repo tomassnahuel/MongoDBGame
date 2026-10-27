@@ -1298,9 +1298,12 @@ export default function GameCanvas3D({ player, onTalkNpc, onZoneChange }) {
     // ─── 3. RENDERER CINEMATOGRÁFICO DE ALTO RENDIMIENTO ────────
     const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: 'high-performance' });
     renderer.setSize(width, height);
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    // Limitar pixel ratio a 1.5 — por encima no hay ganancia visual perceptible
+    // pero sí coste cuadrático de rasterizado (4x píxeles en pantallas Retina 2x)
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
     renderer.shadowMap.enabled = true;
-    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    // PCFShadowMap es 2-3x más rápido que PCFSoftShadowMap con calidad casi idéntica a esta escala
+    renderer.shadowMap.type = THREE.PCFShadowMap;
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
     renderer.toneMappingExposure = 1.22;
     mount.appendChild(renderer.domElement);
@@ -1348,8 +1351,9 @@ export default function GameCanvas3D({ player, onTalkNpc, onZoneChange }) {
     const mainDirLight = new THREE.DirectionalLight(0x9eb8d4, 1.7);
     mainDirLight.position.set(-25, 45, -30);
     mainDirLight.castShadow = true;
-    mainDirLight.shadow.mapSize.width = 2048;
-    mainDirLight.shadow.mapSize.height = 2048;
+    // Shadow map 1024 — suficiente para el área de juego visible; 2048 triplicaba el coste GPU
+    mainDirLight.shadow.mapSize.width = 1024;
+    mainDirLight.shadow.mapSize.height = 1024;
     mainDirLight.shadow.camera.near = 0.5;
     mainDirLight.shadow.camera.far = 130;
     const shadowDist = 42;
@@ -1379,7 +1383,8 @@ export default function GameCanvas3D({ player, onTalkNpc, onZoneChange }) {
     const dayDirPos = new THREE.Vector3(30, 55, 25);
 
     // ─── 6. PARTÍCULAS DE NIEVE Y CENIZA GÉLIDA (BLIZZARD) ──────
-    const snowCount = 1400;
+    // 600 partículas — visualmente indistinguible de 1400 con la densidad de la niebla
+    const snowCount = 600;
     const snowGeo = new THREE.BufferGeometry();
     const snowPos = new Float32Array(snowCount * 3);
     const snowVel = new Float32Array(snowCount);
@@ -1399,7 +1404,7 @@ export default function GameCanvas3D({ player, onTalkNpc, onZoneChange }) {
     });
     const snowPoints = new THREE.Points(snowGeo, snowMat);
     scene.add(snowPoints);
-    stateRef.current.snowParticles = { points: snowPoints, geo: snowGeo, vel: snowVel };
+    stateRef.current.snowParticles = { points: snowPoints, geo: snowGeo, vel: snowVel, arr: snowPos };
 
     // ─── 7. CONSTRUCCIÓN DEL MUNDO GÓTICO ────────────────────────
     buildSoulsCourtyardGround(scene);
@@ -1647,6 +1652,11 @@ export default function GameCanvas3D({ player, onTalkNpc, onZoneChange }) {
     let raf;
     const clock = new THREE.Clock();
 
+    // Pre-alocar objetos reutilizables para evitar GC pressure en el loop (60fps × new Vector3 = miles de objetos/seg)
+    const _targetLook = new THREE.Vector3();
+    const _idealCamPos = new THREE.Vector3();
+    const _zoneVec = new THREE.Vector3();
+
     const animate = () => {
       raf = requestAnimationFrame(animate);
       const delta = Math.min(clock.getDelta(), 0.05);
@@ -1666,16 +1676,16 @@ export default function GameCanvas3D({ player, onTalkNpc, onZoneChange }) {
 
       // Animación de nieve y ventisca de Irithyll
       if (stateRef.current.snowParticles) {
-        const { geo, vel } = stateRef.current.snowParticles;
-        const pos = geo.attributes.position;
+        // Acceso directo al Float32Array en lugar de getX/getY/setX/setY
+        // Elimina ~4800 llamadas a métodos de THREE por frame (600 partículas × 8 calls)
+        const { arr, geo, vel } = stateRef.current.snowParticles;
         for (let i = 0; i < snowCount; i++) {
-          let y = pos.getY(i) - vel[i];
-          let x = pos.getX(i) + Math.sin(t * 0.8 + i) * 0.015;
-          if (y < 0) y = 28;
-          pos.setY(i, y);
-          pos.setX(i, x);
+          const base = i * 3;
+          arr[base + 1] -= vel[i];
+          if (arr[base + 1] < 0) arr[base + 1] = 28;
+          arr[base] += Math.sin(t * 0.8 + i) * 0.015;
         }
-        pos.needsUpdate = true;
+        geo.attributes.position.needsUpdate = true;
       }
 
       // Animación de NPCs (respiración solemne, orientación hacia el jugador y baliza)
@@ -1897,13 +1907,13 @@ export default function GameCanvas3D({ player, onTalkNpc, onZoneChange }) {
       const sprintCamPull = (currentSpeed / maxRunSpeed) * 1.0;
       const effectiveDist = stateRef.current.camDist + sprintCamPull;
 
-      // Objetivo de mirada hacia el personaje con anticipación sutil
-      const targetLook = new THREE.Vector3(
+      // Objetivo de mirada hacia el personaje con anticipación sutil (Vector3 pre-alocado)
+      _targetLook.set(
         playerGroup.position.x + vel.x * 0.08,
         playerGroup.position.y + 1.85,
         playerGroup.position.z + vel.z * 0.08
       );
-      stateRef.current.camLookTarget.lerp(targetLook, 9.0 * delta);
+      stateRef.current.camLookTarget.lerp(_targetLook, 9.0 * delta);
 
       // Coordenadas esféricas de la cámara alrededor del punto de mira
       const cosPitch = Math.cos(stateRef.current.camPitch);
@@ -1911,12 +1921,13 @@ export default function GameCanvas3D({ player, onTalkNpc, onZoneChange }) {
       const sinYaw = Math.sin(stateRef.current.camYaw);
       const cosYaw = Math.cos(stateRef.current.camYaw);
 
-      const idealCamPos = new THREE.Vector3(
+      // Reutilizar _idealCamPos pre-alocado
+      _idealCamPos.set(
         stateRef.current.camLookTarget.x + effectiveDist * cosPitch * sinYaw,
         stateRef.current.camLookTarget.y + effectiveDist * sinPitch,
         stateRef.current.camLookTarget.z + effectiveDist * cosPitch * cosYaw
       );
-      camera.position.lerp(idealCamPos, 10.0 * delta);
+      camera.position.lerp(_idealCamPos, 10.0 * delta);
       camera.lookAt(stateRef.current.camLookTarget);
 
       // ─── INTERACCIÓN DE HOGUERAS Y SABIOS ─────────────────────
@@ -1927,12 +1938,17 @@ export default function GameCanvas3D({ player, onTalkNpc, onZoneChange }) {
         if (d < minDist) { closest = npc; minDist = d; }
       });
 
-      nearbyRef.current = closest ? { npcId: closest.id, name: closest.name, title: closest.title, zoneId: closest.zoneId } : null;
-      setNearbyPrompt(nearbyRef.current);
+      const newPrompt = closest ? { npcId: closest.id, name: closest.name, title: closest.title, zoneId: closest.zoneId } : null;
+      // Solo actualizar estado React si cambió — evita re-render cada frame
+      if (nearbyRef.current?.npcId !== newPrompt?.npcId) {
+        nearbyRef.current = newPrompt;
+        setNearbyPrompt(newPrompt);
+      }
 
-      // Detección de cambio de zona
+      // Detección de cambio de zona (Vector3 pre-alocado, sin alloc por frame)
       zoneConfigs.forEach((zc) => {
-        const d = playerGroup.position.distanceTo(new THREE.Vector3(zc.x, 0, zc.z));
+        _zoneVec.set(zc.x, 0, zc.z);
+        const d = playerGroup.position.distanceTo(_zoneVec);
         if (d < 8 && stateRef.current.activeZone !== zc.id) {
           stateRef.current.activeZone = zc.id;
           onZoneChange(zc.id);
