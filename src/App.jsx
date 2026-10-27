@@ -181,6 +181,7 @@ export default function App() {
           questId={activeChallengeQuestId}
           itemsDb={itemsDb}
           setItemsDb={setItemsDb}
+          health={health}
           onCompleteQuest={(qId) => completeQuest(qId)}
           onWrongAnswer={handleWrongAnswer}
           onClose={() => setActiveChallengeQuestId(null)}

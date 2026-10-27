@@ -6,6 +6,7 @@ export default function ChallengeModal({
   questId,
   itemsDb,
   setItemsDb,
+  health,
   onCompleteQuest,
   onWrongAnswer,
   onClose
@@ -231,6 +232,23 @@ export default function ChallengeModal({
             <div>
               <h2 className="challenge-title">{quest.title}</h2>
               <span className="challenge-mentor">Mentor: {npc?.name} ({npc?.title})</span>
+            </div>
+          </div>
+          <div
+            className="challenge-health"
+            role="progressbar"
+            aria-label="Vida del personaje"
+            aria-valuemin={0}
+            aria-valuemax={100}
+            aria-valuenow={health}
+          >
+            <div className="challenge-health-label">
+              <span aria-hidden="true">♥</span>
+              <span>Vida</span>
+              <span>{health}%</span>
+            </div>
+            <div className="challenge-health-track">
+              <div className="challenge-health-fill" style={{ width: `${health}%` }} />
             </div>
           </div>
           <button className="btn-close-challenge" onClick={onClose} aria-label="Cerrar códice">
