@@ -52,7 +52,7 @@ export default function App() {
   };
 
   return (
-    <div className="game-wrapper game-3d-active">
+    <div className="game-wrapper game-3d-active souls-theme">
       {/* HUD Superior Fijo con Estadísticas y Barra de EXP */}
       <HUD
         player={player}
@@ -64,46 +64,46 @@ export default function App() {
       />
 
       {/* Barra de Modo de Vista y Ayuda */}
-      <div className="view-mode-bar">
+      <div className="view-mode-bar souls-view-bar">
         <div className="view-toggle-group">
           <button
-            className={`btn-view-toggle ${viewMode === '3d' ? 'view-active' : ''}`}
+            className={`btn-view-toggle souls-toggle-btn ${viewMode === '3d' ? 'view-active' : ''}`}
             onClick={() => {
               sound.playSelect();
               setViewMode('3d');
             }}
-            title="Mundo 3D con movimiento libre y personajes"
+            title="Mundo 3D de ruinas y cenizas con movimiento libre"
           >
-            🎮 Mundo 3D Vivo
+            ⚔️ Reino 3D de las Cenizas
           </button>
           <button
-            className={`btn-view-toggle ${viewMode === 'map' ? 'view-active' : ''}`}
+            className={`btn-view-toggle souls-toggle-btn ${viewMode === 'map' ? 'view-active' : ''}`}
             onClick={() => {
               sound.playSelect();
               setViewMode('map');
             }}
-            title="Vista de mapa táctico 2D"
+            title="Vista de mapa cartográfico de los distritos"
           >
-            🗺️ Mapa Táctico 2D
+            🗺️ Cartografía de Ruinas 2D
           </button>
         </div>
 
         {viewMode === '3d' && (
           <button
-            className={`btn-touch-toggle ${showTouchControls ? 'touch-active' : ''}`}
+            className={`btn-touch-toggle souls-toggle-btn ${showTouchControls ? 'touch-active' : ''}`}
             onClick={() => setShowTouchControls((prev) => !prev)}
             title="Mostrar controles táctiles en pantalla"
           >
-            🕹️ {showTouchControls ? 'Ocultar Controles Táctiles' : 'Controles en Pantalla'}
+            🎮 {showTouchControls ? 'Ocultar Mandos Táctiles' : 'Mandos en Pantalla'}
           </button>
         )}
       </div>
 
-      {/* Notificación Flotante */}
+      {/* Notificación Flotante Estilo Cenizas */}
       {notification && (
-        <div className={`toast-notification toast-${notification.type}`} role="status">
+        <div className={`toast-notification souls-toast toast-${notification.type}`} role="status">
           <span className="toast-icon">
-            {notification.type === 'success' ? '🏆' : 'ℹ️'}
+            {notification.type === 'success' ? '🔥' : '⚔️'}
           </span>
           <span className="toast-text">{notification.msg}</span>
         </div>

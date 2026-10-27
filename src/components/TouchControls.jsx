@@ -1,6 +1,6 @@
 import React from 'react';
 
-export default function TouchControls({ onTriggerAction }) {
+export default function TouchControls() {
   // Simular eventos de teclado al tocar los botones en pantalla
   const simulateKey = (key, isDown) => {
     const eventType = isDown ? 'keydown' : 'keyup';
@@ -56,7 +56,7 @@ export default function TouchControls({ onTriggerAction }) {
         </button>
       </div>
 
-      {/* Botones de Acción (Salto y Hablar/Interactuar) */}
+      {/* Botones de Acción */}
       <div className="touch-actions">
         <button
           className="touch-action-btn btn-jump"
@@ -64,19 +64,17 @@ export default function TouchControls({ onTriggerAction }) {
           onMouseUp={() => simulateKey(' ', false)}
           onTouchStart={() => simulateKey(' ', true)}
           onTouchEnd={() => simulateKey(' ', false)}
-          title="Saltar"
         >
-          Salto
+          Saltar
         </button>
         <button
           className="touch-action-btn btn-interact"
           onClick={() => {
             simulateKey('e', true);
-            setTimeout(() => simulateKey('e', false), 150);
+            setTimeout(() => simulateKey('e', false), 50);
           }}
-          title="Interactuar [E]"
         >
-          [E] Hablar
+          Dialogar [E]
         </button>
       </div>
     </div>

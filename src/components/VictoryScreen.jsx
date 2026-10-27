@@ -3,57 +3,75 @@ import { sound } from '../utils/audio';
 
 export default function VictoryScreen({ player, onOpenCodex, onRestart, onClose }) {
   return (
-    <div className="modal-backdrop victory-backdrop" role="dialog" aria-modal="true">
-      <div className="victory-card" onClick={(e) => e.stopPropagation()}>
-        <div className="victory-crown">👑</div>
-        <div className="victory-pretitle">EXPEDICIÓN COMPLETADA CON ÉXITO</div>
-        <h2 className="victory-title">¡Te has Graduado como Maestro del Archivo!</h2>
+    <div className="modal-backdrop victory-backdrop souls-victory-backdrop" role="dialog" aria-modal="true">
+      <div className="victory-card souls-victory-card" onClick={(e) => e.stopPropagation()}>
+        {/* Banner legendario estilo Dark Souls */}
+        <div className="souls-victory-banner">
+          <div className="victory-banner-line line-left"></div>
+          <div className="victory-banner-text">HOGUERA DEL ARCHIVO VINCULADA</div>
+          <div className="victory-banner-line line-right"></div>
+        </div>
 
-        <p className="victory-message">
-          El Gran Custodio Atlas y todo el consejo de Escribas reconocen formalmente tus conocimientos.
-          Has demostrado que no solo comprendes la sintaxis de MongoDB y Mongoose, sino que sabes tomar
-          las decisiones arquitectónicas correctas para una aplicación real en producción.
+        <div className="victory-crown souls-flame-crown">🔥</div>
+        <div className="victory-pretitle souls-pretitle">EXPEDICIÓN SUPREMA COMPLETADA</div>
+        <h2 className="victory-title souls-victory-title">¡Te has Consagrado como Gran Maestro del Archivo!</h2>
+
+        <p className="victory-message souls-victory-message">
+          El Gran Custodio Atlas, la Maestra Bsonia, el Herrero Schemiel y la Sabia Relatia se inclinan ante tu sabiduría.
+          Las cenizas del desconocimiento se han dispersado: ahora dominas la arquitectura NoSQL, los documentos BSON,
+          los esquemas de Mongoose y el criterio técnico que separa a los novicios de los verdaderos arquitectos en producción.
         </p>
 
-        {/* Certificado de Logros */}
-        <div className="victory-diploma-box">
-          <div className="diploma-header">
-            <span>📜 REGISTRO DE MAESTRÍA NO-SQL</span>
-            <span className="diploma-seal">SELLADO</span>
+        {/* Certificado de Logros de las Cenizas */}
+        <div className="victory-diploma-box souls-diploma-box">
+          <div className="diploma-header souls-diploma-header">
+            <span>📜 REGISTRO IMPERIAL DE MAESTRÍA NoSQL</span>
+            <span className="diploma-seal souls-seal-ember">SELLADO CON ASCUA</span>
           </div>
-          <div className="diploma-body">
-            <div className="diploma-player">
-              Escriba Otorgado: <strong>{player.name}</strong> (Nivel {player.level})
+          <div className="diploma-body souls-diploma-body">
+            <div className="diploma-player souls-diploma-player">
+              Señor del Códice: <strong>{player.name}</strong> — Nivel {player.level} ({player.xp} EXP)
             </div>
-            <ul className="diploma-skills-list">
-              <li>✔ Dominio de Documentos BSON, campo <code>_id</code> y operaciones CRUD con <code>$set</code>.</li>
-              <li>✔ Modelado de Esquemas en Node.js y validación robusta con <code>Mongoose</code>.</li>
-              <li>✔ Criterio de arquitectura: Embebido (1:1/1:pocos) vs Referencias con <code>ObjectId</code> y <code>.populate()</code>.</li>
-              <li>✔ Respeto estricto del límite de 16 MB por documento.</li>
+            <ul className="diploma-skills-list souls-skills-list">
+              <li>⚔️ <strong>Fundamentos de MongoDB:</strong> Colecciones, documentos BSON, identificador único <code>_id</code> y actualizaciones atómicas seguras con <code>$set</code>.</li>
+              <li>⚔️ <strong>Modelado y Esquemas Mongoose:</strong> Validación estricta en tiempo de ejecución (<code>required</code>, <code>enum</code>, <code>min</code>) y tipado de modelos para Node.js.</li>
+              <li>⚔️ <strong>Criterio de Arquitectura Documental:</strong> Cuándo Embeber (1:1 o 1:pocos acoplados) vs Cuándo Referenciar con <code>ObjectId</code> y <code>.populate()</code>.</li>
+              <li>⚔️ <strong>Límites y Rendimiento:</strong> Respeto inquebrantable del límite de 16 MB por documento de MongoDB.</li>
             </ul>
           </div>
         </div>
 
         {/* Botones de Acción */}
-        <div className="victory-actions">
+        <div className="victory-actions souls-victory-actions">
           <button
-            className="btn-victory-codex"
+            className="btn-victory-codex souls-btn-gold"
             onClick={() => {
               sound.playSelect();
               onOpenCodex();
             }}
           >
-            📖 Abrir Grimorio de Documentación Oficial
+            📖 Consultar Grimorio y Documentación Oficial
           </button>
 
           <button
-            className="btn-victory-close"
+            className="btn-victory-close souls-btn-dark"
             onClick={() => {
               sound.playSelect();
               onClose();
             }}
           >
-            Volver a la Ciudadela
+            Regresar al Santuario
+          </button>
+
+          <button
+            className="btn-victory-restart souls-btn-ember"
+            onClick={() => {
+              if (window.confirm('¿Deseas renacer en las cenizas e iniciar un nuevo viaje?')) {
+                onRestart();
+              }
+            }}
+          >
+            🔄 Nuevo Ciclo de Cenizas
           </button>
         </div>
       </div>

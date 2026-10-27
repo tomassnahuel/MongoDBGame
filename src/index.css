@@ -1,28 +1,44 @@
-/* Reset y variables de diseño del RPG MongoDB Quest */
+/* Reset y variables de diseño - MongoDB Quest: Estética Gótica Oscura (Dark Souls / Cenizas) */
 :root {
-  --bg-main: #090d16;
-  --bg-surface: #111827;
-  --bg-surface-elevated: #1e293b;
-  --bg-panel: #0f172a;
-  
-  --color-primary: #10b981;       /* Verde Esmeralda MongoDB */
-  --color-primary-glow: rgba(16, 185, 129, 0.25);
-  --color-secondary: #f59e0b;     /* Ámbar / Oro RPG */
-  --color-secondary-glow: rgba(245, 158, 11, 0.25);
-  --color-accent: #38bdf8;        /* Azul Cristal Mongoose */
-  --color-danger: #f43f5e;
-  
-  --text-main: #f8fafc;
+  --bg-main: #060913;
+  --bg-surface: #0a0e1a;
+  --bg-surface-elevated: #111728;
+  --bg-panel: rgba(10, 14, 26, 0.94);
+  --bg-modal: rgba(5, 7, 14, 0.88);
+
+  /* Paleta Dark Souls: Ascuas, Frío Lunar, Hechicería y Oro Antiguo */
+  --color-primary: #ff6b2b;          /* Ascua Ardiente / Fuego de Hoguera */
+  --color-primary-glow: rgba(255, 107, 43, 0.35);
+  --color-ember: #ff4500;
+  --color-secondary: #c59b27;        /* Oro envejecido / Latón de caballero */
+  --color-secondary-glow: rgba(197, 155, 39, 0.3);
+  --color-gold: #d4af37;
+  --color-moon: #93c5fd;             /* Frío lunar de Irithyll */
+  --color-moon-glow: rgba(147, 197, 253, 0.25);
+  --color-accent: #a855f7;          /* Hechicería Púrpura de Cristales */
+  --color-accent-glow: rgba(168, 85, 247, 0.3);
+  --color-emerald: #10b981;         /* Runas arcanas BSON */
+  --color-danger: #ef4444;
+
+  --text-main: #f1f5f9;
+  --text-parchment: #e2d9c8;
   --text-muted: #94a3b8;
   --text-dim: #64748b;
-  
-  --border-subtle: #1e293b;
-  --border-gold: #f59e0b;
-  --border-emerald: #10b981;
-  
-  --font-fantasy: 'Cinzel', serif, Georgia;
+  --text-gold: #e6c65c;
+
+  /* Bordes de piedra y filigrana oscura */
+  --border-subtle: rgba(71, 85, 105, 0.35);
+  --border-iron: #334155;
+  --border-gold: rgba(197, 155, 39, 0.5);
+  --border-ember: rgba(255, 107, 43, 0.5);
+
+  --font-fantasy: 'Cinzel', Georgia, serif;
+  --font-title: 'Cinzel Decorative', 'Cinzel', serif;
+  --font-serif: 'Cormorant Garamond', Georgia, serif;
   --font-sans: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
   --font-mono: 'JetBrains Mono', monospace, Consolas;
+
+  --shadow-gothic: 0 10px 30px rgba(0, 0, 0, 0.8), 0 0 1px 1px rgba(212, 175, 55, 0.15);
 }
 
 * {
@@ -41,24 +57,31 @@ html, body {
   overflow-x: hidden;
 }
 
-/* Scrollbars personalizados estilo RPG */
+/* Scrollbars personalizados estilo Grimorio Gótico */
 ::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+  width: 7px;
+  height: 7px;
 }
 
 ::-webkit-scrollbar-track {
-  background: #090d16;
+  background: #04060c;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #1e293b;
-  border-radius: 4px;
+  background: #1e2638;
+  border-radius: 2px;
   border: 1px solid #334155;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #10b981;
+  background: #ff6b2b;
+  border-color: #ffd000;
+  box-shadow: 0 0 8px rgba(255, 107, 43, 0.5);
+}
+
+::selection {
+  background: rgba(255, 107, 43, 0.35);
+  color: #fff;
 }
 
 code, pre {
