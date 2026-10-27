@@ -47,6 +47,18 @@ export default function App() {
   const activeNpc = NPCS[activeNpcId];
   const isQuestDone = activeNpc ? player.completedQuests.includes(activeNpc.questId) : false;
 
+  useEffect(() => {
+    const startAudio = () => sound.playBgm();
+    window.addEventListener('pointerdown', startAudio);
+    window.addEventListener('keydown', startAudio);
+    sound.playBgm();
+
+    return () => {
+      window.removeEventListener('pointerdown', startAudio);
+      window.removeEventListener('keydown', startAudio);
+    };
+  }, []);
+
   const handleWrongAnswer = () => {
     setHealth((currentHealth) => Math.max(0, currentHealth - 10));
   };

@@ -694,11 +694,11 @@ function createDustParticleSystem(scene) {
       const i = (nextIdx + k) % count;
       const angle = Math.random() * Math.PI * 2;
       const rSpeed = speed * (0.35 + Math.random() * 0.8);
-      positions[i * 3]     = x + Math.cos(angle) * 0.2;
+      positions[i * 3] = x + Math.cos(angle) * 0.2;
       positions[i * 3 + 1] = y + 0.06 + Math.random() * 0.08;
       positions[i * 3 + 2] = z + Math.sin(angle) * 0.2;
 
-      velocities[i * 3]     = Math.cos(angle) * rSpeed;
+      velocities[i * 3] = Math.cos(angle) * rSpeed;
       velocities[i * 3 + 1] = 0.5 + Math.random() * 1.4;
       velocities[i * 3 + 2] = Math.sin(angle) * rSpeed;
 
@@ -718,7 +718,7 @@ function createDustParticleSystem(scene) {
           positions[i * 3 + 1] = -100;
         } else {
           active = true;
-          positions[i * 3]     += velocities[i * 3] * delta;
+          positions[i * 3] += velocities[i * 3] * delta;
           positions[i * 3 + 1] += velocities[i * 3 + 1] * delta;
           positions[i * 3 + 2] += velocities[i * 3 + 2] * delta;
           velocities[i * 3 + 1] -= 5.5 * delta; // Gravedad
@@ -743,28 +743,28 @@ function resolveWorldCollisions(pos, vel, playerRadius = 0.65) {
   const cylindricalObstacles = [
     // 4 Hogueras
     { x: -16, z: -14, r: 1.55 },
-    { x: 16,  z: -14, r: 1.55 },
-    { x: -16, z: 14,  r: 1.55 },
-    { x: 16,  z: 14,  r: 1.55 },
+    { x: 16, z: -14, r: 1.55 },
+    { x: -16, z: 14, r: 1.55 },
+    { x: 16, z: 14, r: 1.55 },
     // 4 Sabios / NPCs de Dark Souls
     { x: -13.8, z: -14, r: 0.95 },
-    { x: 18.2,  z: -14, r: 0.95 },
-    { x: -13.8, z: 14,  r: 0.95 },
-    { x: 18.2,  z: 14,  r: 0.95 },
+    { x: 18.2, z: -14, r: 0.95 },
+    { x: -13.8, z: 14, r: 0.95 },
+    { x: 18.2, z: 14, r: 0.95 },
     // 8 Farolas de hierro góticas
     { x: -8, z: -8, r: 0.48 },
-    { x: 8,  z: -8, r: 0.48 },
-    { x: -18, z: 4,  r: 0.48 },
-    { x: 18,  z: 4,  r: 0.48 },
-    { x: -6, z: 18,  r: 0.48 },
-    { x: 6,  z: 18,  r: 0.48 },
+    { x: 8, z: -8, r: 0.48 },
+    { x: -18, z: 4, r: 0.48 },
+    { x: 18, z: 4, r: 0.48 },
+    { x: -6, z: 18, r: 0.48 },
+    { x: 6, z: 18, r: 0.48 },
     { x: -22, z: -18, r: 0.48 },
-    { x: 22,  z: -18, r: 0.48 },
+    { x: 22, z: -18, r: 0.48 },
     // 4 Grandes Torres / Agujas góticas perimetrales
     { x: -34, z: -28, r: 2.8 },
-    { x: 34,  z: -28, r: 2.8 },
-    { x: -32, z: 28,  r: 2.8 },
-    { x: 32,  z: 28,  r: 2.8 },
+    { x: 34, z: -28, r: 2.8 },
+    { x: -32, z: 28, r: 2.8 },
+    { x: 32, z: 28, r: 2.8 },
   ];
 
   for (let i = 0; i < cylindricalObstacles.length; i++) {
@@ -809,9 +809,9 @@ function resolveWorldCollisions(pos, vel, playerRadius = 0.65) {
   // Balaustradas centrales de piedra
   const boxes = [
     { minX: -17.5, maxX: -2.5, minZ: -18.7, maxZ: -17.3 },
-    { minX: 2.5,   maxX: 17.5, minZ: -18.7, maxZ: -17.3 },
-    { minX: -18.7, maxX: -17.3, minZ: 2.5,  maxZ: 17.5 },
-    { minX: 17.3,  maxX: 18.7,  minZ: 2.5,  maxZ: 17.5 },
+    { minX: 2.5, maxX: 17.5, minZ: -18.7, maxZ: -17.3 },
+    { minX: -18.7, maxX: -17.3, minZ: 2.5, maxZ: 17.5 },
+    { minX: 17.3, maxX: 18.7, minZ: 2.5, maxZ: 17.5 },
   ];
 
   for (let b = 0; b < boxes.length; b++) {
@@ -1389,7 +1389,7 @@ export default function GameCanvas3D({ player, onTalkNpc, onZoneChange }) {
     const snowPos = new Float32Array(snowCount * 3);
     const snowVel = new Float32Array(snowCount);
     for (let i = 0; i < snowCount; i++) {
-      snowPos[i * 3]     = (Math.random() - 0.5) * 80;
+      snowPos[i * 3] = (Math.random() - 0.5) * 80;
       snowPos[i * 3 + 1] = Math.random() * 28;
       snowPos[i * 3 + 2] = (Math.random() - 0.5) * 80;
       snowVel[i] = 0.04 + Math.random() * 0.08;
@@ -1438,7 +1438,7 @@ export default function GameCanvas3D({ player, onTalkNpc, onZoneChange }) {
       {
         id: 'zone_relations',
         name: 'Hoguera de la Torre de Enlaces',
-        x: -16,
+        x: -15,
         z: 14,
         color: 0x38bdf8,
         npcId: 'npc_relatia',
@@ -1449,7 +1449,7 @@ export default function GameCanvas3D({ player, onTalkNpc, onZoneChange }) {
       {
         id: 'zone_sanctum',
         name: 'Hoguera del Santuario del Custodio',
-        x: 16,
+        x: 14,
         z: 14,
         color: 0xa855f7,
         npcId: 'npc_atlas',
@@ -1472,8 +1472,8 @@ export default function GameCanvas3D({ player, onTalkNpc, onZoneChange }) {
       {
         id: 'zone_bson_archive',
         name: 'Archivo de Tipos BSON',
-        x: 13,
-        z: -19,
+        x: 5,
+        z: 23,
         color: 0xeab308,
         npcId: 'npc_archivist',
         questId: 'quest_6',
@@ -1484,8 +1484,8 @@ export default function GameCanvas3D({ player, onTalkNpc, onZoneChange }) {
       {
         id: 'zone_nested_garden',
         name: 'Jardín de Documentos Anidados',
-        x: 22,
-        z: -1,
+        x: 24,
+        z: 0,
         color: 0x22c55e,
         npcId: 'npc_gardener',
         questId: 'quest_7',
@@ -1496,8 +1496,8 @@ export default function GameCanvas3D({ player, onTalkNpc, onZoneChange }) {
       {
         id: 'zone_dot_tower',
         name: 'Torre de la Notación de Puntos',
-        x: 13,
-        z: 19,
+        x: -7,
+        z: 23,
         color: 0x06b6d4,
         npcId: 'npc_pathfinder',
         questId: 'quest_8',
@@ -1508,8 +1508,8 @@ export default function GameCanvas3D({ player, onTalkNpc, onZoneChange }) {
       {
         id: 'zone_id_vault',
         name: 'Bóveda de Identificadores',
-        x: -13,
-        z: 19,
+        x: -24,
+        z: 23,
         color: 0x8b5cf6,
         npcId: 'npc_guardian',
         questId: 'quest_9',
@@ -1520,8 +1520,8 @@ export default function GameCanvas3D({ player, onTalkNpc, onZoneChange }) {
       {
         id: 'zone_gridfs_gate',
         name: 'Umbral de GridFS',
-        x: -22,
-        z: -1,
+        x: -24,
+        z: 0,
         color: 0xec4899,
         npcId: 'npc_keeper',
         questId: 'quest_10',
@@ -1554,9 +1554,9 @@ export default function GameCanvas3D({ player, onTalkNpc, onZoneChange }) {
 
     const handleKeyDown = (e) => {
       const k = e.key;
-      if (k === 'w' || k === 'W' || k === 'ArrowUp')    stateRef.current.keys.w = true;
-      if (k === 's' || k === 'S' || k === 'ArrowDown')  stateRef.current.keys.s = true;
-      if (k === 'a' || k === 'A' || k === 'ArrowLeft')  stateRef.current.keys.a = true;
+      if (k === 'w' || k === 'W' || k === 'ArrowUp') stateRef.current.keys.w = true;
+      if (k === 's' || k === 'S' || k === 'ArrowDown') stateRef.current.keys.s = true;
+      if (k === 'a' || k === 'A' || k === 'ArrowLeft') stateRef.current.keys.a = true;
       if (k === 'd' || k === 'D' || k === 'ArrowRight') stateRef.current.keys.d = true;
       if (k === 'Shift') stateRef.current.keys.shift = true;
       if (k === ' ') {
@@ -1583,9 +1583,9 @@ export default function GameCanvas3D({ player, onTalkNpc, onZoneChange }) {
 
     const handleKeyUp = (e) => {
       const k = e.key;
-      if (k === 'w' || k === 'W' || k === 'ArrowUp')    stateRef.current.keys.w = false;
-      if (k === 's' || k === 'S' || k === 'ArrowDown')  stateRef.current.keys.s = false;
-      if (k === 'a' || k === 'A' || k === 'ArrowLeft')  stateRef.current.keys.a = false;
+      if (k === 'w' || k === 'W' || k === 'ArrowUp') stateRef.current.keys.w = false;
+      if (k === 's' || k === 'S' || k === 'ArrowDown') stateRef.current.keys.s = false;
+      if (k === 'a' || k === 'A' || k === 'ArrowLeft') stateRef.current.keys.a = false;
       if (k === 'd' || k === 'D' || k === 'ArrowRight') stateRef.current.keys.d = false;
       if (k === 'Shift') stateRef.current.keys.shift = false;
     };
