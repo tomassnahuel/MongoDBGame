@@ -183,7 +183,7 @@ export const NPCS = {
     name: "Maestra Bsonia",
     title: "Escriba Mayor de Documentos BSON",
     avatar: "🧙‍♀️",
-    model: "/models/dark_knight_-_hitem3d_hi3d_vs_supavoxel_test.glb",
+    model: "/models/lowpoly_pbr_knight_armour.glb",
     zoneId: "zone_bson",
     questId: "quest_1",
     dialogue: {
@@ -283,7 +283,7 @@ export const NPCS = {
     name: "Arquitecta Relatia",
     title: "Guardiana de la Aguja de Relaciones",
     avatar: "🧙‍♂️",
-    model: "/models/knight_artorias.glb",
+    model: "/models/mastercraft_mithril_armor_set_for_beyond_skyrim2.glb",
     zoneId: "zone_relations",
     questId: "quest_3",
     dialogue: {
@@ -369,7 +369,7 @@ export const NPCS = {
     name: "Escriba Clavaria",
     title: "Cartógrafa de Campos y Valores",
     avatar: "🗂️",
-    model: "/models/ember_winged_fallen_angel_warrior.glb",
+    model: "/models/knight_artorias.glb",
     zoneId: "zone_document_hall",
     questId: "quest_5",
     dialogue: {
@@ -493,7 +493,7 @@ export const NPCS = {
     name: "Custodia Idalia",
     title: "Protectora de la Llave Primaria",
     avatar: "🔐",
-    model: "/models/dark_knight_-_hitem3d_hi3d_vs_supavoxel_test.glb",
+    model: "/models/lowpoly_pbr_knight_armour.glb",
     zoneId: "zone_id_vault",
     questId: "quest_9",
     dialogue: {
