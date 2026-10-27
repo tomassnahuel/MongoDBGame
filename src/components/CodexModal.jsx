@@ -40,7 +40,7 @@ export default function CodexModal({ onClose }) {
               setActiveTab('cheatsheet');
             }}
           >
-            ⚡ Chuleta de Fórmulas y Códigos Clave
+            ⚡ Hoja de Fórmulas y Códigos Clave
           </button>
         </div>
 
@@ -79,7 +79,7 @@ export default function CodexModal({ onClose }) {
               <div className="cheat-section">
                 <h4 className="cheat-heading">1. BSON & Operaciones CRUD en MongoDB</h4>
                 <pre className="cheat-code">
-{`// Lectura con filtros:
+                  {`// Lectura con filtros:
 db.coleccion.find({ tipo: "pocion", stock: { $gte: 10 } });
 
 // Modificación atómica con $set:
@@ -94,7 +94,7 @@ db.coleccion.updateOne(
               <div className="cheat-section">
                 <h4 className="cheat-heading">2. Esquema y Validación en Mongoose (Node.js)</h4>
                 <pre className="cheat-code">
-{`const mongoose = require('mongoose');
+                  {`const mongoose = require('mongoose');
 
 const usuarioSchema = new mongoose.Schema({
   nombre: { type: String, required: [true, 'El nombre es obligatorio'], trim: true },
@@ -111,7 +111,7 @@ module.exports = mongoose.model('Usuario', usuarioSchema);`}
               <div className="cheat-section">
                 <h4 className="cheat-heading">3. Relaciones: Embebido vs Referenciado con .populate()</h4>
                 <pre className="cheat-code">
-{`// A. Embebido (1:1 o 1:pocos acotados):
+                  {`// A. Embebido (1:1 o 1:pocos acotados):
 direccion: { calle: String, ciudad: String } // Dentro del mismo documento
 
 // B. Referenciado (1:Muchos ilimitados o N:M):

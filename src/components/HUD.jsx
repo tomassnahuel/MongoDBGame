@@ -115,7 +115,7 @@ export default function HUD({
           title="Grimorio de Hechizos y Documentación (Click para abrir)"
         >
           <span className="slot-icon">📖</span>
-          <span className="slot-label">Grimorio</span>
+          <span className="slot-label">Ayuda</span>
         </div>
 
         {/* Izquierda: Escudo de Caballero */}
