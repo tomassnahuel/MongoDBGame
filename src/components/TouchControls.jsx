@@ -1,82 +1,132 @@
 import React from 'react';
 
-export default function TouchControls({ onTriggerAction }) {
-  // Simular eventos de teclado al tocar los botones en pantalla
+export default function TouchControls() {
+  // Simular eventos de teclado al tocar o mantener pulsados los controles
   const simulateKey = (key, isDown) => {
     const eventType = isDown ? 'keydown' : 'keyup';
-    window.dispatchEvent(new KeyboardEvent(eventType, { key }));
+    window.dispatchEvent(
+      new KeyboardEvent(eventType, {
+        key,
+        code: key === ' ' ? 'Space' : key === 'Shift' ? 'ShiftLeft' : `Key${key.toUpperCase()}`,
+        bubbles: true,
+        cancelable: true
+      })
+    );
   };
 
+  const bindKey = (key) => ({
+    onPointerDown: (e) => {
+      e.preventDefault();
+      simulateKey(key, true);
+    },
+    onPointerUp: (e) => {
+      e.preventDefault();
+      simulateKey(key, false);
+    },
+    onPointerLeave: () => {
+      simulateKey(key, false);
+    },
+    onPointerCancel: () => {
+      simulateKey(key, false);
+    },
+    onTouchStart: (e) => {
+      e.preventDefault();
+      simulateKey(key, true);
+    },
+    onTouchEnd: (e) => {
+      e.preventDefault();
+      simulateKey(key, false);
+    }
+  });
+
   return (
-    <div className="touch-controls-container">
-      {/* Pad Direccional */}
+    <div className="touch-controls-container" aria-label="Controles táctiles en pantalla">
+      {/* Pad Direccional de Movimiento (W, A, S, D) */}
       <div className="touch-dpad">
         <button
+          type="button"
           className="dpad-btn dpad-up"
-          onMouseDown={() => simulateKey('w', true)}
-          onMouseUp={() => simulateKey('w', false)}
-          onTouchStart={() => simulateKey('w', true)}
-          onTouchEnd={() => simulateKey('w', false)}
-          aria-label="Avanzar"
+          {...bindKey('w')}
+          aria-label="Avanzar (W)"
+          title="Avanzar [W]"
         >
           ▲
         </button>
+
         <div className="dpad-middle">
           <button
+            type="button"
             className="dpad-btn dpad-left"
-            onMouseDown={() => simulateKey('a', true)}
-            onMouseUp={() => simulateKey('a', false)}
-            onTouchStart={() => simulateKey('a', true)}
-            onTouchEnd={() => simulateKey('a', false)}
-            aria-label="Izquierda"
+            {...bindKey('a')}
+            aria-label="Izquierda (A)"
+            title="Izquierda [A]"
           >
             ◀
           </button>
-          <div className="dpad-center"></div>
+
+          <div className="dpad-center" aria-hidden="true">
+            <span className="dpad-center-rune">✦</span>
+          </div>
+
           <button
+            type="button"
             className="dpad-btn dpad-right"
-            onMouseDown={() => simulateKey('d', true)}
-            onMouseUp={() => simulateKey('d', false)}
-            onTouchStart={() => simulateKey('d', true)}
-            onTouchEnd={() => simulateKey('d', false)}
-            aria-label="Derecha"
+            {...bindKey('d')}
+            aria-label="Derecha (D)"
+            title="Derecha [D]"
           >
             ▶
           </button>
         </div>
+
         <button
+          type="button"
           className="dpad-btn dpad-down"
-          onMouseDown={() => simulateKey('s', true)}
-          onMouseUp={() => simulateKey('s', false)}
-          onTouchStart={() => simulateKey('s', true)}
-          onTouchEnd={() => simulateKey('s', false)}
-          aria-label="Retroceder"
+          {...bindKey('s')}
+          aria-label="Retroceder (S)"
+          title="Retroceder [S]"
         >
           ▼
         </button>
       </div>
 
-      {/* Botones de Acción (Salto y Hablar/Interactuar) */}
+      {/* Botones de Acción (Salto, Sprint y Hablar/Interactuar) */}
       <div className="touch-actions">
+        {/* Botón de Carrera / Sprint (Shift) */}
         <button
-          className="touch-action-btn btn-jump"
-          onMouseDown={() => simulateKey(' ', true)}
-          onMouseUp={() => simulateKey(' ', false)}
-          onTouchStart={() => simulateKey(' ', true)}
-          onTouchEnd={() => simulateKey(' ', false)}
-          title="Saltar"
+          type="button"
+          className="touch-action-btn btn-sprint"
+          {...bindKey('Shift')}
+          title="Mantener para correr rápido [Shift]"
         >
-          Salto
+          <span className="action-icon">⚡</span>
+          <span className="action-text">Sprint</span>
         </button>
+
+        {/* Botón de Salto (Espacio) */}
         <button
-          className="touch-action-btn btn-interact"
-          onClick={() => {
-            simulateKey('e', true);
-            setTimeout(() => simulateKey('e', false), 150);
-          }}
-          title="Interactuar [E]"
+          type="button"
+          className="touch-action-btn btn-jump"
+          {...bindKey(' ')}
+          title="Saltar [Espacio]"
         >
-          [E] Hablar
+          <span className="action-icon">🦘</span>
+          <span className="action-text">Salto</span>
+        </button>
+
+        {/* Botón de Interactuar / Hablar (E) */}
+        <button
+          type="button"
+          className="touch-action-btn btn-interact"
+          onPointerDown={(e) => {
+            e.preventDefault();
+            simulateKey('e', true);
+            setTimeout(() => simulateKey('e', false), 160);
+          }}
+          title="Interactuar o Hablar con Sabios / Descansar en Hoguera [E]"
+        >
+          <span className="action-icon">💬</span>
+          <span className="action-text">Hablar [E]</span>
         </button>
       </div>
     </div>

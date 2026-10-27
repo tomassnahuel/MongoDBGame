@@ -10,6 +10,7 @@ import ChallengeModal from './components/ChallengeModal';
 import InventoryModal from './components/InventoryModal';
 import CodexModal from './components/CodexModal';
 import VictoryScreen from './components/VictoryScreen';
+import QuestRoadmap from './components/QuestRoadmap';
 import { NPCS } from './data/gameData';
 import { sound } from './utils/audio';
 import './App.css';
@@ -77,7 +78,7 @@ export default function App() {
   }, [health]);
 
   return (
-    <div className="game-wrapper game-3d-active">
+    <div className={`game-wrapper game-3d-active ${showTouchControls ? 'touch-controls-enabled' : ''}`}>
       {/* HUD Superior Fijo con Estadísticas y Barra de EXP */}
       <HUD
         player={player}
@@ -87,6 +88,17 @@ export default function App() {
         onOpenInventory={() => setShowInventory(true)}
         onOpenCodex={() => setShowCodex(true)}
         onResetGame={handleResetGame}
+      />
+
+      {/* Roadmap de Misiones a la izquierda (Principales y Secundarias) */}
+      <QuestRoadmap
+        player={player}
+        onSelectZone={(zId) => updateZone(zId)}
+        onTalkNpc={(npcId) => setActiveNpcId(npcId)}
+        onStartChallenge={(questId) => {
+          setActiveNpcId(null);
+          setActiveChallengeQuestId(questId);
+        }}
       />
 
       {/* Barra de Modo de Vista y Ayuda */}

@@ -1245,7 +1245,7 @@ function buildSoulsNPCs(scene, zoneConfigs, loader) {
 export default function GameCanvas3D({ player, onTalkNpc, onZoneChange }) {
   const mountRef = useRef(null);
   const [nearbyPrompt, setNearbyPrompt] = useState(null);
-  const [controlsHelp, setControlsHelp] = useState(true);
+  const [controlsHelp, setControlsHelp] = useState(false);
   const [isDayTime, setIsDayTime] = useState(true);
 
   const stateRef = useRef({

@@ -141,16 +141,13 @@ export default function HUD({
         >
           <span className="slot-icon">🏺</span>
           <span className="slot-badge">{player.inventory.length}</span>
+          <span className="slot-label">Estus</span>
           <span className="slot-estus-name">Frasco Estus +{player.inventory.length}</span>
         </div>
-      </div>
 
-      {/* ─── HUD INFERIOR DERECHO: CONTADOR DE ALMAS / ORO DARK SOULS ──── */}
-      <div className="souls-counter-container">
-        <div className="souls-rune-icon">✧</div>
-        <div className="souls-count-display">
-          <span className="souls-label">ALMAS / ORO</span>
-          <span className="souls-number">{player.gold}</span>
+        {/* Nexo Central Decorativo del Diamante */}
+        <div className="souls-dpad-nexus" aria-hidden="true">
+          <span>✧</span>
         </div>
       </div>
     </>

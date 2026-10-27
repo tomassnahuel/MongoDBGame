@@ -554,6 +554,8 @@ export const NPCS = {
 export const QUESTS = {
   quest_1: {
     id: "quest_1",
+    category: "main",
+    order: 1,
     title: "Misión I: El Catálogo Desordenado",
     zoneId: "zone_bson",
     npcId: "npc_bsonia",
@@ -571,6 +573,8 @@ export const QUESTS = {
 
   quest_2: {
     id: "quest_2",
+    category: "main",
+    order: 2,
     title: "Misión II: El Sello de Validación",
     zoneId: "zone_mongoose",
     npcId: "npc_schemiel",
@@ -588,6 +592,8 @@ export const QUESTS = {
 
   quest_3: {
     id: "quest_3",
+    category: "main",
+    order: 3,
     title: "Misión III: El Dilema de las Relaciones",
     zoneId: "zone_relations",
     npcId: "npc_relatia",
@@ -605,6 +611,9 @@ export const QUESTS = {
 
   quest_4: {
     id: "quest_4",
+    category: "main",
+    order: 4,
+    requiresCoreQuests: true,
     title: "Misión Final: El Juicio del Custodio",
     zoneId: "zone_sanctum",
     npcId: "npc_atlas",
@@ -622,6 +631,8 @@ export const QUESTS = {
 
   quest_5: {
     id: "quest_5",
+    category: "side",
+    order: 1,
     title: "Misión Secundaria: El Archivo de Claves",
     zoneId: "zone_document_hall",
     npcId: "npc_scribe",
@@ -646,6 +657,8 @@ export const QUESTS = {
 
   quest_6: {
     id: "quest_6",
+    category: "side",
+    order: 2,
     title: "Misión Secundaria: El Espejo BSON",
     zoneId: "zone_bson_archive",
     npcId: "npc_archivist",
@@ -670,6 +683,8 @@ export const QUESTS = {
 
   quest_7: {
     id: "quest_7",
+    category: "side",
+    order: 3,
     title: "Misión Secundaria: El Jardín Anidado",
     zoneId: "zone_nested_garden",
     npcId: "npc_gardener",
@@ -694,6 +709,8 @@ export const QUESTS = {
 
   quest_8: {
     id: "quest_8",
+    category: "side",
+    order: 4,
     title: "Misión Secundaria: La Ruta de los Puntos",
     zoneId: "zone_dot_tower",
     npcId: "npc_pathfinder",
@@ -718,6 +735,8 @@ export const QUESTS = {
 
   quest_9: {
     id: "quest_9",
+    category: "side",
+    order: 5,
     title: "Misión Secundaria: La Bóveda de _id",
     zoneId: "zone_id_vault",
     npcId: "npc_guardian",
@@ -742,6 +761,8 @@ export const QUESTS = {
 
   quest_10: {
     id: "quest_10",
+    category: "side",
+    order: 6,
     title: "Misión Secundaria: El Umbral de 16 MiB",
     zoneId: "zone_gridfs_gate",
     npcId: "npc_keeper",
