@@ -507,7 +507,7 @@ function createBonfireMissionTitle(zc) {
   return { sprite, texture, mat };
 }
 
-function buildSoulsBonfires(scene, zoneConfigs, loader) {
+function buildSoulsBonfires(scene, zoneConfigs, loader, onProgress) {
   const bonfireObjects = zoneConfigs.map((zc) => {
     const group = new THREE.Group();
     group.position.set(zc.x, 0, zc.z);
@@ -622,7 +622,9 @@ function buildSoulsBonfires(scene, zoneConfigs, loader) {
         bf.modelSlot.add(clone);
       });
     },
-    undefined,
+    (xhr) => {
+      if (onProgress) onProgress('/models/bonfire_-_dark_souls.glb', xhr);
+    },
     (error) => {
       console.error('Error al cargar bonfire_-_dark_souls.glb:', error);
     }
@@ -840,7 +842,7 @@ function resolveWorldCollisions(pos, vel, playerRadius = 0.65) {
 // ============================================================================
 // MODELO DEL JUGADOR: MAGO CON ESQUELETO Y ANIMACIONES (WIZARD RIGGED)
 // ============================================================================
-function loadWizardCharacter(scene, playerGroup, onLoadingState) {
+function loadWizardCharacter(scene, playerGroup, onLoadingState, customLoader, onProgress) {
   // innerGroup aloja la cinemática física secundaria: inclinación, inercia, squash & stretch
   const innerGroup = new THREE.Group();
   playerGroup.add(innerGroup);
@@ -873,7 +875,7 @@ function loadWizardCharacter(scene, playerGroup, onLoadingState) {
   let mixer = null;
   const actions = { walk: null, run: null };
 
-  const loader = new GLTFLoader();
+  const loader = customLoader || new GLTFLoader();
 
   loader.load(
     '/models/wizard-rigged.glb',
@@ -950,7 +952,9 @@ function loadWizardCharacter(scene, playerGroup, onLoadingState) {
 
       if (onLoadingState) onLoadingState(false);
     },
-    undefined,
+    (xhr) => {
+      if (onProgress) onProgress('/models/wizard-rigged.glb', xhr);
+    },
     (error) => {
       console.error('Error al cargar wizard-rigged.glb:', error);
     }
@@ -1073,7 +1077,7 @@ const NPC_CONFIGS = {
   },
 };
 
-function buildSoulsNPCs(scene, zoneConfigs, loader) {
+function buildSoulsNPCs(scene, zoneConfigs, loader, onProgress) {
   const npcMeshes = zoneConfigs.map((zc) => {
     const config = NPC_CONFIGS[zc.npcId] || {
       modelFile: '/models/witch_hunter_in_long_coat_and_wide_hat.glb',
@@ -1229,7 +1233,9 @@ function buildSoulsNPCs(scene, zoneConfigs, loader) {
           }
         });
       },
-      undefined,
+      (xhr) => {
+        if (onProgress) onProgress(file, xhr);
+      },
       (err) => {
         console.error(`Error al cargar modelo de NPC (${file}):`, err);
       }
@@ -1242,7 +1248,7 @@ function buildSoulsNPCs(scene, zoneConfigs, loader) {
 // ============================================================================
 // COMPONENTE PRINCIPAL: LIENZO 3D DARK SOULS 3 (IRITHYLL ESTILO ARTÍSTICO)
 // ============================================================================
-export default function GameCanvas3D({ player, onTalkNpc, onZoneChange }) {
+export default function GameCanvas3D({ player, onTalkNpc, onZoneChange, onLoadingProgress, onLoaded }) {
   const mountRef = useRef(null);
   const [nearbyPrompt, setNearbyPrompt] = useState(null);
   const [controlsHelp, setControlsHelp] = useState(false);
@@ -1531,15 +1537,82 @@ export default function GameCanvas3D({ player, onTalkNpc, onZoneChange }) {
       },
     ];
 
-    const gltfLoader = new GLTFLoader();
+    // ─── GESTOR DE CARGA PROGRESIVA REAL THREE.JS ────────────────
+    const loadingManager = new THREE.LoadingManager();
+    const downloadMap = new Map();
+    let isLoadFinished = false;
+
+    const notifyFinished = () => {
+      if (isLoadFinished) return;
+      isLoadFinished = true;
+      onLoadingProgress?.({
+        percent: 100,
+        stage: '¡Reino de Irithyll cargado! Entrando...',
+      });
+      setTimeout(() => {
+        onLoaded?.();
+      }, 350);
+    };
+
+    const handleModelProgress = (file, xhr) => {
+      if (isLoadFinished) return;
+      if (xhr && xhr.lengthComputable && xhr.total > 0) {
+        downloadMap.set(file, { loaded: xhr.loaded, total: xhr.total });
+        let totalLoaded = 0;
+        let totalExpected = 0;
+        for (const entry of downloadMap.values()) {
+          totalLoaded += entry.loaded;
+          totalExpected += entry.total;
+        }
+        if (totalExpected > 0) {
+          const ratio = totalLoaded / totalExpected;
+          // De 8% a 92% basado en bytes reales descargados
+          const percent = Math.min(92, Math.max(8, Math.round(ratio * 92)));
+          const cleanName = file.split('/').pop().replace(/\.glb|\.gltf/i, '').replace(/[-_]/g, ' ');
+          const mbLoaded = (totalLoaded / (1024 * 1024)).toFixed(1);
+          const mbTotal = (totalExpected / (1024 * 1024)).toFixed(1);
+          onLoadingProgress?.({
+            percent,
+            stage: `Descargando: ${cleanName} (${mbLoaded} MB / ${mbTotal} MB)`,
+          });
+        }
+      }
+    };
+
+    loadingManager.onProgress = (url, itemsLoaded, itemsTotal) => {
+      if (isLoadFinished) return;
+      const managerRatio = itemsTotal > 0 ? itemsLoaded / itemsTotal : 1;
+      const percent = Math.min(98, Math.max(12, Math.round(managerRatio * 98)));
+      const fileName = url.split('/').pop().replace(/[-_]/g, ' ');
+      onLoadingProgress?.({
+        percent,
+        stage: `Compilando mallas y texturas: ${fileName} (${itemsLoaded}/${itemsTotal})`,
+      });
+    };
+
+    loadingManager.onLoad = () => {
+      notifyFinished();
+    };
+
+    loadingManager.onError = (url) => {
+      console.warn('Recurso 3D con advertencia o error:', url);
+    };
+
+    // Timeout de seguridad en caso de redes lentas
+    const safetyTimeout = setTimeout(() => {
+      notifyFinished();
+    }, 12000);
+
+    const gltfLoader = new GLTFLoader(loadingManager);
     const bonfireObjects = buildSoulsBonfires(
       scene,
       zoneConfigs.filter((zone) => zone.hasBonfire !== false),
-      gltfLoader
+      gltfLoader,
+      handleModelProgress
     );
 
     // ─── 9. NPCs DE DARK SOULS (SABIOS Y CUSTODIOS) ─────────────
-    const npcMeshes = buildSoulsNPCs(scene, zoneConfigs, gltfLoader);
+    const npcMeshes = buildSoulsNPCs(scene, zoneConfigs, gltfLoader, handleModelProgress);
     stateRef.current.npcObjects = npcMeshes;
 
     // ─── 11. PERSONAJE JUGADOR: MAGO ARTICULADO (GLTF RIGGED) ─
@@ -1547,7 +1620,7 @@ export default function GameCanvas3D({ player, onTalkNpc, onZoneChange }) {
     playerGroup.position.set(0, 0, 4);
     scene.add(playerGroup);
 
-    const playerData = loadWizardCharacter(scene, playerGroup);
+    const playerData = loadWizardCharacter(scene, playerGroup, undefined, gltfLoader, handleModelProgress);
 
     // ─── 12. ENTRADA DE TECLADO ─────────────────────────────────
     const nearbyRef = { current: null };
